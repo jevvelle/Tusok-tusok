@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2b1b3d">
+<title>Tusok-Tusok</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+
+<!-- shared street background for the menu, intro and creator -->
+<div id="bg"><div class="bgglow"></div><div class="skyline" id="skyline"></div><div class="bgroad"></div><div class="bglights"></div><div class="floaters" id="floaters"></div></div>
+
+<!-- MAIN MENU -->
+<section class="screen on" id="s0">
+  <div class="mawn"></div><div class="mlights"></div>
+  <div class="mtop">
+    <button class="ib" id="mfull" aria-label="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="ib" id="msound" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
+  </div>
+  <div class="mchars" id="mchars"></div>
+  <div class="mcounter"></div>
+  <div class="mk">
+    <div class="fire"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="pan"><div class="oil"><b class="fb" style="left:18%;top:28%"></b><b class="fb" style="left:42%;top:40%"></b><b class="fb" style="left:64%;top:26%"></b></div></div>
+    <div class="steam"><i style="left:28%"></i><i style="left:48%;animation-delay:.8s"></i><i style="left:66%;animation-delay:1.6s"></i></div>
+  </div>
+  <div class="mcenter">
+    <div class="logo"><h1>TUSOK-TUSOK</h1><div class="ribbon"><span>Aling Nena's Street Food Cart</span></div></div>
+    <div class="mbtns">
+      <button id="play" class="bigbtn">PLAY</button>
+      <div class="row"><button id="mhow" class="alt">How to Play</button><button id="msets" class="alt">Settings</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY INTRO -->
+<section class="screen" id="s1"><div class="talk">
+  <div class="nena" id="nena"></div>
+  <div class="card dlg">
+    <span class="nametag">Aling Nena</span>
+    <p class="narr">You've been hired by Aling Nena to help run her famous "tusok-tusok" street food cart!</p>
+    <p class="said">"Magandang araw! Halika, tulungan mo ako sa kariton ko."</p>
+    <button id="accept" class="bigbtn sm">Accept Job</button>
+  </div>
+</div></section>
+
+<!-- CHARACTER CREATOR (step by step) -->
+<section class="screen" id="s2"><div class="card wz" id="wz" data-step="1">
+  <ol class="prog" id="prog"></ol>
+  <h1 id="wtitle"></h1>
+  <p class="sub" id="wsub"></p>
+  <div class="wbody">
+    <div class="pcol" id="pcol">
+      <div class="preview"><div id="cprev"></div></div>
+      <div class="pname" id="cname"></div>
+      <button id="rnd" class="alt small">Surprise me</button>
+    </div>
+    <div class="ocol">
+      <div class="step" id="st1"><div class="ctags" id="ctags"></div><p class="pickhint" id="wpick">Tap a character to select</p></div>
+      <div class="step" id="st2"><div class="grp"><h4>Skin tone: <span id="n_skin"></span></h4><div class="sws" id="c_skin"></div></div></div>
+      <div class="step" id="st3">
+        <div class="grp"><h4>Hair style</h4><div class="chips" id="c_style"></div></div>
+        <div class="grp"><h4>Hair color: <span id="n_hair"></span></h4><div class="sws" id="c_hair"></div></div>
+      </div>
+      <div class="step" id="st4"><div class="grp"><h4>Outfit</h4><div class="chips" id="c_outfit"></div></div></div>
+      <div class="step" id="st5">
+        <div class="grp"><h4>Top color: <span id="n_top"></span></h4><div class="sws" id="c_top"></div></div>
+        <div class="grp"><h4 id="h_acc">Accent: <span id="n_acc"></span></h4><div class="sws" id="c_acc"></div></div>
+      </div>
+      <div class="step" id="st6">
+        <div class="grp"><h4>Your name</h4><input type="text" id="nm" maxlength="14" placeholder="Enter your name"></div>
+        <div class="grp"><h4>Customers will call you</h4><div class="opts" id="ti"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="wnav">
+    <button id="wback" class="gray">Back</button>
+    <span class="spacer"></span>
+    <button id="wskip" class="link">Skip customizing</button>
+    <button id="wnext">Next</button>
+    <button id="go" class="bigbtn sm">Start Game</button>
+  </div>
+</div></section>
+
+<!-- GAME: a fixed 16:9 stage that fits any landscape screen -->
+<main id="game"><div class="scene" id="scene">
+  <div class="hud">
+    <div class="me"><div class="mini" id="mini"></div><b id="who"></b></div>
+    <div class="lvl">Level <b id="lv">1</b><div class="bar"><i id="xp"></i></div><small id="nx"></small></div>
+    <div class="stat">₱<b id="cn">0</b> earned · <b id="sv">0</b> served · counter <b id="cc">0/1</b></div>
+    <span class="spacer"></span>
+    <button id="fsbtn" class="hb">Full screen</button><button id="sbtn" class="hb gray">Sound: On</button><button id="pbtn" class="hb">Pause</button>
+  </div>
+
+  <div class="sky"></div><div class="bld b1"></div><div class="bld b2"></div><div class="bld b3"></div><div class="bld b4"></div><div class="road"></div>
+  <div id="custs"></div>
+  <div class="awning"></div><div class="lights"></div>
+  <p class="tip" id="tip"></p>
+
+  <div class="counter">
+    <div class="jars" id="jars"></div>
+    <div class="bagwrap"><div class="bag" id="bag"></div></div>
+    <div class="acts"><button id="srv">Hand over order</button><button id="clr" class="gray">Empty bag</button></div>
+  </div>
+
+  <div class="fore">
+    <div class="tray" id="tray"></div>
+    <div class="kw"><div class="fire"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="pan"><div class="oil" id="oil"><div class="slots" id="slots"></div></div></div></div>
+    <div class="cash" id="cash"></div>
+    <div class="arm l"></div><div class="arm r"></div>
+  </div>
+</div></main>
+
+<!-- level, unlock and victory popups -->
+<div class="ov" id="modal"><div class="mcard">
+  <h2 id="mt"></h2>
+  <div class="micon" id="mi"></div>
+  <p id="md"></p>
+  <button id="mc">Continue</button> <button id="mc2" class="alt">Main menu</button>
+</div></div>
+
+<!-- pause menu -->
+<div class="ov" id="pausem"><div class="mcard">
+  <h2>Paused</h2>
+  <p>Take a breath. The kawali and your customers are waiting.</p>
+  <div class="mbtns2">
+    <button id="resume">Resume</button>
+    <button id="phow" class="alt">How to Play</button>
+    <button id="psets" class="alt">Settings</button>
+    <button id="quit" class="gray">Quit to Menu</button>
+  </div>
+  <p class="hint">Tip: press Esc or P to pause.</p>
+</div></div>
+
+<!-- settings -->
+<div class="ov" id="settings"><div class="mcard">
+  <h2>Settings</h2>
+  <label class="srow">Sound effects <input type="range" id="set_sfx" min="0" max="1" step=".05"></label>
+  <label class="srow">Street ambience <input type="range" id="set_amb" min="0" max="1" step=".05"></label>
+  <label class="srow">Difficulty
+    <select id="set_diff"><option value="relaxed">Relaxed</option><option value="normal">Normal</option><option value="rush">Rush hour</option></select></label>
+  <label class="srow">Show totals (easy mode) <input type="checkbox" id="set_easy"></label>
+  <label class="srow" id="fsrow">Full screen <button id="sfull" class="alt small">Toggle</button></label>
+  <p class="hint">Settings are saved on this device.</p>
+  <button id="sclose">Done</button>
+</div></div>
+
+<!-- how to play -->
+<div class="ov" id="howm"><div class="mcard">
+  <h2>How to Play</h2>
+  <ol>
+    <li>Customers walk up and ask for a number of items. Tap a customer to work on their order. Each customer has their own bag.</li>
+    <li>Tap a food bin to fry it. When it glows golden, tap it to put it in the selected customer's bag. Tap burnt food to throw it away.</li>
+    <li>Tap the sauce jar they asked for (and the palamig jug once unlocked), then press Hand over order.</li>
+    <li>The customer pays with a bill or coins. Work out the total from the prices on the bins, tap bills and coins in the cash drawer to give the exact change, then press Give change.</li>
+    <li>Fast service earns tips. Wait too long and customers leave. Earn pesos to level up, unlock new food, and open more counter spots.</li>
+    <li>Reach Level 5 and earn ₱1000 to become a Master Vendor.</li>
+  </ol>
+  <button id="hclose">Got it</button>
+</div></div>
+
+<div id="rotate"><div class="phone"></div><p>Please rotate your phone to landscape</p></div>
+<div id="toast"></div>
+<script src="audio.js"></script>
+<script src="game.js"></script>
+<script src="creator.js"></script>
+<script src="ui.js"></script>
+</body></html>
