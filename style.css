@@ -333,3 +333,36 @@ input[type=text]{width:100%;padding:12px 16px;border-radius:999px;border:3px sol
 .phone::after{content:'';position:absolute;left:50%;bottom:6px;width:14px;height:4px;margin-left:-7px;border-radius:2px;background:#faf3dd}
 @keyframes turn{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
 @media (orientation:portrait) and (max-width:700px){#rotate{display:flex}}
+
+/* ---------- creator: richer options, tabs, smoother motion ---------- */
+.eyes{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.chip .eyes{animation:none}
+.step.on.fwd{animation:stepinR .3s ease-out}
+.step.on.back{animation:stepinL .3s ease-out}
+@keyframes stepinR{from{opacity:0;transform:translateX(26px)}}
+@keyframes stepinL{from{opacity:0;transform:translateX(-26px)}}
+.pop svg{animation:popin .28s cubic-bezier(.3,1.7,.5,1)}
+@keyframes popin{from{transform:scale(.94,1.04)}60%{transform:scale(1.03,.98)}}
+.chip{transition:transform .12s,border-color .12s,background .12s}
+.chip:hover{transform:translateY(-2px)}
+.chip svg{height:auto}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{background:#fff;color:var(--d);box-shadow:0 3px 0 #0003;padding:6px 16px;font-size:.9rem}
+.tabs button.on{background:var(--t);color:#fff;box-shadow:0 3px 0 #a8452b}
+.tabpane{display:none}
+.tabpane.on{display:block;animation:stepin .25s}
+#s2.edit{z-index:150;background:#000c}
+.wz[data-edit] .prog li:first-child{display:none}
+.wz[data-edit] .prog li:nth-child(2)::before{display:none}
+
+/* ---------- full body previews, locked styles ---------- */
+#cprev[data-v="full"]{width:min(138px,21vh)}
+.ctag .art svg{width:min(118px,21vh)}
+.chip{position:relative}
+.chip.locked svg{filter:grayscale(1) brightness(.85);opacity:.55}
+.chip.locked{background:#eee}
+.chip .lk{position:absolute;top:4px;right:4px;background:var(--d);color:#fff;font-size:.62rem;padding:1px 6px;border-radius:999px}
+.micon.tall{height:200px}
+.micon.tall .ch{width:auto;height:190px}
+@media (max-height:620px){.micon.tall{height:150px!important}.micon.tall .ch{height:140px!important;width:auto!important}}

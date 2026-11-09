@@ -8,7 +8,7 @@ const FS = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
 function saveSet() { try { localStorage.setItem('tusok-set', JSON.stringify(S.set)); } catch (e) { /* storage blocked, settings just won't persist */ } }
 function syncSet() {
   $('#set_sfx').value = S.set.sfx; $('#set_amb').value = S.set.amb; $('#set_diff').value = S.set.diff;
-  $('#set_easy').checked = S.set.easy;
+  $('#set_easy').checked = S.set.easy; $('#set_unlock').checked = S.set.unlockAll;
   $('#sbtn').textContent = 'Sound: ' + (S.set.mute ? 'Off' : 'On');
   $('#msound').classList.toggle('off', S.set.mute);
   SND.vol();
@@ -40,7 +40,7 @@ function menuArt() {
   }
   [[11, 0, 'Pabili po!'], [25, 3, ''], [75, 6, 'Isa pa po!'], [89, 5, '']].forEach(([x, t, say], i) => {
     const l = TYPES[t].mk(); l.skin = SK[(i * 2) % SK.length]; l.hair = l.hair || HC[i % HC.length];
-    const c = el('div', 'mc', ch({ ...l, mood: 'happy' }) + (say ? `<span class="sp">${say}</span>` : ''));
+    const c = el('div', 'mc', ch({ ...l, eyes: pick(['round', 'sparkle', 'lashes', 'dots']), mood: 'happy' }) + (say ? `<span class="sp">${say}</span>` : ''));
     c.style.left = x + '%'; c.style.animationDelay = `-${i * .7}s`; $('#mchars').append(c);
   });
 }
@@ -50,7 +50,11 @@ function menuArt() {
   $('#play').onclick = () => show('s1');
   $('#accept').onclick = () => show('s2');
   ['mhow', 'phow'].forEach(id => $('#' + id).onclick = () => ov('howm', true));
-  ['msets', 'psets'].forEach(id => $('#' + id).onclick = () => ov('settings', true));
+  const openSettings = () => { $('#sedit_row').style.display = S.on ? '' : 'none'; ov('settings', true); };
+  ['msets', 'psets'].forEach(id => $('#' + id).onclick = openSettings);
+  /* change how your character looks, even in the middle of a game */
+  const edit = () => { ov('settings', false); openEditor(); };
+  $('#sedit').onclick = edit; $('#pedit').onclick = edit;
   $('#hclose').onclick = () => ov('howm', false);
   $('#sclose').onclick = () => ov('settings', false);
   $('#pbtn').onclick = openPause;
@@ -65,6 +69,7 @@ function menuArt() {
   $('#set_sfx').oninput = e => { S.set.sfx = +e.target.value; saveSet(); SND.init(); SND.vol(); SND.clink(5); };
   $('#set_amb').oninput = e => { S.set.amb = +e.target.value; saveSet(); SND.init(); SND.vol(); };
   $('#set_diff').onchange = e => { S.set.diff = e.target.value; saveSet(); };
+  $('#set_unlock').onchange = e => { S.set.unlockAll = e.target.checked; saveSet(); };
   $('#set_easy').onchange = e => { S.set.easy = e.target.checked; saveSet(); syncSet(); if (S.on) drawCash(); };
 
   /* on phones and tablets, starting the game goes full screen and tries to lock landscape */
@@ -74,10 +79,12 @@ function menuArt() {
 
   /* first tap anywhere unlocks browser audio; every menu button gets a small tap sound */
   document.addEventListener('pointerdown', () => SND.init(), { once: true });
-  document.addEventListener('click', e => { if (e.target.closest('.screen button, .ov button, .hud button, .ib')) SND.click(); });
+  document.addEventListener('click', e => { if (e.target.closest('.screen button, .ov button, .hud button, .ib') && !e.target.closest('.chip, .sw, .swl, .ctag')) SND.click(); });
 
   /* Esc or P: close the top overlay, otherwise pause. Switching tabs or rotating to portrait also pauses. */
   document.addEventListener('keydown', e => {
+    if (editing) { if (e.key === 'Escape') cancelEdit(); return; }
+    if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
     if (isOn('settings')) return ov('settings', false);
     if (isOn('howm')) return ov('howm', false);

@@ -21,7 +21,9 @@ const SA = {
 };
 const TH = [0, 0, 100, 250, 450, 700, 1000], RAW = 4000, BURN = 9500, N = 8;
 const DM = { relaxed: .7, normal: 1, rush: 1.35 };
-const DEF = { sfx: .7, amb: .35, diff: 'normal', easy: false, mute: false };
+const DEF = { sfx: .7, amb: .35, diff: 'normal', easy: false, mute: false, unlockAll: false };
+function loadBest() { try { return +localStorage.getItem('tusok-best') || 1; } catch (e) { return 1; } }
+function saveBest() { try { localStorage.setItem('tusok-best', S.best); } catch (e) { /* storage blocked */ } }
 function loadSet() { try { return { ...DEF, ...JSON.parse(localStorage.getItem('tusok-set') || '{}') }; } catch (e) { return { ...DEF }; } }
 const CAP = l => l >= 4 ? 3 : l >= 2 ? 2 : 1;
 const SEATS = { 1: [50], 2: [30, 70], 3: [17, 50, 83] };
@@ -48,50 +50,6 @@ const TYPES = [
     say: (t, n, o) => pick([`${t} ${n}, duty ko mamaya. Pabili ng ${o}.`, `Good afternoon po, ${t} ${n}. ${up(o)}!`]) }
 ];
 
-/* ---------- SVG CHARACTERS ---------- */
-function ch(o) {
-  const sk = o.skin || '#f0bf94', hc = o.hair || '#2b1a12', tp = o.top || '#fff', m = o.mood || 'happy', x = o.extra || [], st = o.style || 'short';
-  let back = '', front = `<path d="M31 42Q29 10 60 10Q91 10 89 42Q80 26 60 28Q40 26 31 42Z" fill="${hc}"/>`;
-  if (st === 'long') back = `<path d="M30 44Q26 8 60 8Q94 8 90 44V90H78V46H42V90H30Z" fill="${hc}"/>`;
-  if (st === 'bun') back = `<circle cx="60" cy="8" r="11" fill="${hc}"/>`;
-  const tie = o.accent || '#ff6fa5';
-  if (st === 'pigtails') back = `<ellipse cx="20" cy="64" rx="9" ry="17" fill="${hc}"/><ellipse cx="100" cy="64" rx="9" ry="17" fill="${hc}"/><rect x="17" y="46" width="14" height="6" rx="3" fill="${tie}"/><rect x="89" y="46" width="14" height="6" rx="3" fill="${tie}"/>`;
-  if (st === 'ponytail') back = `<path d="M84 30Q116 34 110 84Q98 72 96 56Q92 44 84 42Z" fill="${hc}"/><rect x="82" y="32" width="9" height="13" rx="4" fill="${tie}"/>`;
-  if (st === 'straight') {
-    back = `<path d="M29 44Q24 8 60 8Q96 8 91 44V104H29Z" fill="${hc}"/>`;
-    front = `<path d="M31 44Q29 10 60 10Q91 10 89 44Q76 30 60 28Q44 30 31 44Z" fill="${hc}"/><rect x="27" y="66" width="13" height="42" rx="6" fill="${hc}"/><rect x="80" y="66" width="13" height="42" rx="6" fill="${hc}"/>`;
-  }
-  if (st === 'wavy') {
-    back = `<path d="M30 44Q20 58 29 70Q20 80 30 92L40 92Q34 70 41 46ZM90 44Q100 58 91 70Q100 80 90 92L80 92Q86 70 79 46Z" fill="${hc}"/>`;
-    front = `<path d="M31 42Q28 8 60 8Q92 8 89 42Q84 32 78 30Q72 40 64 30Q56 40 48 30Q40 32 31 42Z" fill="${hc}"/>`;
-  }
-  if (st === 'bandana') front += `<rect x="31" y="21" width="58" height="8" rx="3" fill="${o.accent || '#e63946'}"/><path d="M89 24l10 6-10 3z" fill="${o.accent || '#e63946'}"/>`;
-  if (st === 'cap') front = `<path d="M31 36Q33 7 60 7Q87 7 89 36Z" fill="${o.cap}"/><rect x="28" y="33" width="64" height="8" rx="4" fill="${o.cap}"/><path d="M31 38V52Q37 50 37 40ZM89 38V52Q83 50 83 40Z" fill="${hc}"/>`;
-  if (x.includes('helmet')) front += '<path d="M30 30Q32 3 60 3Q88 3 90 30Z" fill="#f4c430"/><rect x="27" y="28" width="66" height="8" rx="4" fill="#f4c430"/>';
-  if (x.includes('headband')) front += '<rect x="31" y="19" width="58" height="6" rx="3" fill="#ff6fa5"/>';
-  const brows = m === 'angry' ? '<path d="M42 33L56 38M78 33L64 38" stroke="#2b1a12" stroke-width="3" stroke-linecap="round"/>'
-    : '<path d="M43 35Q49 31 55 35M65 35Q71 31 77 35" stroke="#2b1a12" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
-  const mouth = m === 'happy' ? '<path d="M49 52Q60 66 71 52Z" fill="#b5413a"/><path d="M53 56Q60 61 67 56" fill="#ff8a8a"/>'
-    : m === 'angry' ? '<path d="M50 60Q60 52 70 60" stroke="#8a2b2b" stroke-width="3" fill="none" stroke-linecap="round"/>'
-    : '<path d="M52 56Q60 60 68 56" stroke="#8a2b2b" stroke-width="3" fill="none" stroke-linecap="round"/>';
-  let ex = '';
-  if (x.includes('strap')) ex += '<rect x="30" y="68" width="9" height="82" fill="#1d3557" opacity=".9"/><rect x="81" y="68" width="9" height="82" fill="#1d3557" opacity=".9"/>';
-  if (x.includes('vest')) ex += '<path d="M20 150V98Q20 74 44 70L54 150ZM100 150V98Q100 74 76 70L66 150Z" fill="#ff7a1a"/><path d="M26 112H50M70 112H94" stroke="#f5f5a0" stroke-width="5"/>';
-  if (x.includes('collar')) ex += '<path d="M48 68L60 86L72 68Z" fill="#fff" stroke="#0002"/>';
-  if (x.includes('tie')) ex += '<path d="M48 68L60 80L72 68Z" fill="#fff"/><path d="M56 78h8l4 30-8 8-8-8z" fill="#c1121f"/>';
-  if (x.includes('id')) ex += `<path d="M50 68L60 104L70 68" stroke="${o.accent || '#e63946'}" stroke-width="3" fill="none"/><rect x="54" y="102" width="12" height="15" rx="2" fill="#fff" stroke="#555"/>`;
-  if (x.includes('apron')) ex += `<path d="M32 150V104Q32 90 46 90H74Q88 90 88 104V150Z" fill="${o.accent || '#fff'}" opacity=".96"/><path d="M46 90L50 69M74 90L70 69" stroke="${o.accent || '#fff'}" stroke-width="4"/><rect x="48" y="120" width="24" height="16" rx="4" fill="#0002"/>`;
-  if (x.includes('polo')) ex += `<path d="M44 68L60 94L76 68L68 65L60 77L52 65Z" fill="${o.accent || '#fff'}" stroke="#0002"/><path d="M60 80V104" stroke="#0003" stroke-width="2"/><circle cx="60" cy="90" r="2" fill="#0004"/><circle cx="60" cy="100" r="2" fill="#0004"/><rect x="4" y="100" width="20" height="7" fill="${o.accent || '#fff'}"/><rect x="96" y="100" width="20" height="7" fill="${o.accent || '#fff'}"/>`;
-  if (x.includes('tee')) ex += `<path d="M46 68Q60 88 74 68" fill="none" stroke="${o.accent || '#fff'}" stroke-width="4"/><path d="M60 98l4 9h10l-8 6 3 10-9-6-9 6 3-10-8-6h10z" fill="${o.accent || '#fff'}"/>`;
-  if (x.includes('floral')) ex += [[34, 92], [52, 110], [76, 96], [90, 126], [40, 132], [66, 130]].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#ffd6e0"/>`).join('');
-  const face = `<ellipse cx="60" cy="42" rx="27" ry="29" fill="${sk}"/><circle cx="33" cy="45" r="6" fill="${sk}"/><circle cx="87" cy="45" r="6" fill="${sk}"/>`;
-  const eyes = '<circle cx="49" cy="44" r="3.8" fill="#2b1a12"/><circle cx="71" cy="44" r="3.8" fill="#2b1a12"/><circle cx="50.2" cy="42.8" r="1.3" fill="#fff"/><circle cx="72.2" cy="42.8" r="1.3" fill="#fff"/><circle cx="41" cy="52" r="4.5" fill="#ff8a8a" opacity=".45"/><circle cx="79" cy="52" r="4.5" fill="#ff8a8a" opacity=".45"/>';
-  const gl = x.includes('glasses') ? '<g fill="none" stroke="#444" stroke-width="2"><circle cx="49" cy="44" r="8"/><circle cx="71" cy="44" r="8"/><path d="M57 44h6"/></g>' : '';
-  const mu = x.includes('mustache') ? `<path d="M47 51Q60 45 73 51Q66 56 60 52Q54 56 47 51Z" fill="${hc}"/>` : '';
-  return `<svg viewBox="0 0 120 150" class="ch">${back}<rect x="4" y="76" width="20" height="74" rx="10" fill="${tp}"/><rect x="96" y="76" width="20" height="74" rx="10" fill="${tp}"/><path d="M18 150V98Q18 72 44 68H76Q102 72 102 98V150Z" fill="${tp}"/>${ex}<rect x="52" y="58" width="16" height="16" fill="${sk}"/>${face}${eyes}${brows}${mouth}${mu}${gl}${front}</svg>`;
-}
-const mini = o => ch(o).replace('viewBox="0 0 120 150"', 'viewBox="12 0 96 78"');
-
 /* ---------- SVG FOOD + MONEY ---------- */
 function food(k) {
   if (k === 'palamig') return cup();
@@ -109,7 +67,7 @@ const coin = d => `<svg viewBox="0 0 40 40" class="mn"><circle cx="20" cy="20" r
 const money = d => BILL[d] ? bill(d) : coin(d);
 
 /* ---------- STATE ---------- */
-const S = { name: '', title: 'Ate', earned: 0, level: 1, served: 0, slots: Array(N).fill(null), custs: [], sel: null, give: [], uid: 0, on: false, paused: false, pauseAt: 0, nextSpawn: 0, queue: [], holds: 0, mastered: false, set: loadSet() };
+const S = { name: '', title: 'Ate', earned: 0, level: 1, served: 0, slots: Array(N).fill(null), custs: [], sel: null, give: [], uid: 0, on: false, paused: false, pauseAt: 0, nextSpawn: 0, queue: [], holds: 0, mastered: false, set: loadSet(), best: loadBest() };
 let slotEls = [], bagKey = '';
 const tgt = () => S.custs.find(c => c.id === S.sel);
 const state = s => { const a = Date.now() - s.t; return a < RAW ? 'raw' : a < BURN ? 'ready' : 'burnt'; };
@@ -148,17 +106,13 @@ function build() {
   $('#cgo').onclick = giveChange;
   $('#cclr').onclick = () => { S.give = []; drawCash(); };
   $('#accept').onclick = () => show('s2');
-  $('#go').onclick = start;
   $('#srv').onclick = handOver;
   $('#clr').onclick = () => { const c = tgt(); if (c && c.phase === 'order') { c.bag = {}; c.got = null; draw(); } };
   $('#mc').onclick = nextPopup;
 }
 function start() {
   S.name = $('#nm').value.trim() || 'Juan';
-  const a = crOpts();
-  $('#who').textContent = `${S.title} ${S.name}`;
-  $('#mini').innerHTML = mini(a);
-  $$('.arm').forEach(x => { x.style.setProperty('--hand', a.skin); x.style.setProperty('--sleeve', a.top); });
+  applyLook();
   show(''); $('#game').classList.add('on');
   document.body.classList.add('ingame'); S.on = true; S.nextSpawn = Date.now() + 700; SND.init(); SND.loop(); syncSet();
   draw(); setInterval(tick, 200); setInterval(bubbles, 260);
@@ -234,6 +188,8 @@ function render(c) {
 function seatUp() { const cp = CAP(S.level); S.custs.forEach(c => c.el.style.left = SEATS[cp][c.seat] + '%'); }
 function spawn() {
   const ty = pick(TYPES), look = ty.mk(); look.skin = pick(SK); look.hair = look.hair || pick(HC);
+  look.eyes = pick(['round', 'round', 'dots', 'sparkle', 'lashes']); look.eyeColor = pick(['#3b2314', '#3b2314', '#6b3e1f', '#4a8fd6']);
+  look.ac = pick(['#e63946', '#5aa9e6', '#f4d35e', '#8a63d2']); if (Math.random() < .3) look.face = ['freckles']; if (Math.random() < .2) look.ears = 'studs';
   const cp = CAP(S.level), seat = [0, 1, 2].slice(0, cp).find(s => !S.custs.some(c => c.seat === s));
   const order = makeOrder(), rushed = Math.random() < .25;
   const total = sum(order.map(l => FD[l.k].p * l.qty));
@@ -270,8 +226,9 @@ function giveChange() {
   S.earned += c.total + c.tip; S.served++; SND.kaching();
   toast(`Thank you! +₱${c.total}${c.tip ? ` and ₱${c.tip} tip` : ''}`);
   const old = S.level; for (let i = 2; i <= 5; i++) if (S.earned >= TH[i]) S.level = i;
+  if (S.level > S.best) { S.best = S.level; saveBest(); }
   removeCust(c, 'happy');
-  for (let l = old + 1; l <= S.level; l++) { S.queue.push({ t: 'lv', l }); (UNL[l] || []).forEach(u => S.queue.push({ t: 'un', u, l })); }
+  for (let l = old + 1; l <= S.level; l++) { S.queue.push({ t: 'lv', l }); (UNL[l] || []).forEach(u => S.queue.push({ t: 'un', u, l })); if (accNew(l).length) S.queue.push({ t: 'acc', l }); }
   if (!S.mastered && S.earned >= TH[6]) { S.mastered = true; S.queue.push({ t: 'win' }); }
   if (S.queue.length) { hold(); nextPopup(); }
 }
@@ -286,11 +243,14 @@ function nextPopup() {
   }
   let h, ic, d;
   $('#mc2').style.display = q.t === 'win' ? 'inline-block' : 'none';
-  ({ lv: () => SND.fanfare(), un: () => SND.unlock(), win: () => SND.win() })[q.t]();
+  ({ lv: () => SND.fanfare(), un: () => SND.unlock(), acc: () => SND.unlock(), win: () => SND.win() })[q.t]();
   if (q.t === 'win') {
     h = 'Level 5 complete!';
     ic = '<svg viewBox="0 0 80 80"><path d="M22 10h36v18a18 18 0 0 1-36 0z" fill="#f4c430" stroke="#a8661a" stroke-width="3"/><path d="M22 14H10q0 18 14 20M58 14h12q0 18-14 20" fill="none" stroke="#a8661a" stroke-width="4"/><rect x="34" y="44" width="12" height="14" fill="#e0a82e"/><rect x="24" y="58" width="32" height="10" rx="3" fill="#a8661a"/></svg>';
     d = `Master Vendor! You earned ₱${S.earned} and served ${S.served} customers. Aling Nena says: "Ikaw na ang pinakamagaling kong katulong sa kariton, ${S.name}!" Keep playing with faster customers, or head back to the menu.`;
+  } else if (q.t === 'acc') {
+    const n = accNew(q.l); h = 'New styles unlocked!'; ic = previewWith(n[0].key, n[0].val);
+    d = `You can now wear: ${n.map(i => i.label).join(', ')}. Open Customize in the Pause menu to try ${n.length > 1 ? 'them' : 'it'} on.`;
   } else if (q.t === 'lv') {
     h = `Level ${q.l - 1} complete!`; ic = `<div class="badge">${q.l}</div>`;
     d = `You are now Level ${q.l}, ${S.title} ${S.name}. Ang galing mo! Aling Nena is proud of you.`;
@@ -301,7 +261,7 @@ function nextPopup() {
     const k = q.u.k; h = 'You unlocked ' + FD[k].n + '!'; ic = food(k);
     d = k === 'palamig' ? `Tap the palamig jug on the counter to fill a cup. ₱${FD[k].p} each.` : `${FD[k].n} is now in the food bins, ₱${FD[k].p} each. Customers will start ordering it.`;
   }
-  $('#mt').textContent = h; $('#mi').innerHTML = ic; $('#md').textContent = d;
+  $('#mt').textContent = h; $('#mi').innerHTML = ic; $('#mi').classList.toggle('tall', q.t === 'acc'); $('#md').textContent = d;
   $('#mc').textContent = q.t === 'win' ? 'Keep playing' : S.queue.length ? 'Next' : 'Continue';
   $('#modal').classList.add('on');
 }

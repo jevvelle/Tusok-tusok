@@ -49,6 +49,10 @@ const SND = {
 
   /* ---- ui + money ---- */
   click() { this.tone(900, .05, 'triangle', .1); },
+  /* character editor: soft cloth rustle, a swoosh between steps, and a sparkle when you save */
+  equip() { this.noise(.09, .13, 2600, 'bandpass'); this.tone(700, .09, 'triangle', .1, .02, 1050); },
+  swoosh() { this.noise(.2, .1, 1000, 'bandpass'); this.noise(.16, .08, 2400, 'bandpass', .06); },
+  sparkle() { [1568, 1976, 2349, 3136, 3951].forEach((f, i) => this.tone(f, .22, 'sine', .09, i * .07)); },
   grab() { this.tone(660, .07, 'triangle', .14); },
   err() { this.tone(170, .24, 'square', .12, 0, 110); },
   sad() { this.tone(420, .45, 'sine', .14, 0, 200); },

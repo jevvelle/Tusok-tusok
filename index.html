@@ -60,17 +60,40 @@
     </div>
     <div class="ocol">
       <div class="step" id="st1"><div class="ctags" id="ctags"></div><p class="pickhint" id="wpick">Tap a character to select</p></div>
-      <div class="step" id="st2"><div class="grp"><h4>Skin tone: <span id="n_skin"></span></h4><div class="sws" id="c_skin"></div></div></div>
+      <div class="step" id="st2">
+        <div class="grp"><h4>Skin tone: <span id="n_skin"></span></h4><div class="sws" id="c_skin"></div></div>
+        <div class="grp"><h4>Eye style</h4><div class="chips" id="c_eyes"></div></div>
+        <div class="grp"><h4>Eye color: <span id="n_eyecol"></span></h4><div class="sws" id="c_eyecol"></div></div>
+      </div>
       <div class="step" id="st3">
+        <div class="grp"><h4>Smile</h4><div class="chips" id="c_mouth"></div></div>
+        <div class="grp"><h4>Face extras (pick any)</h4><div class="chips" id="c_facex"></div></div>
+        <div class="grp"><h4>Facial hair</h4><div class="chips" id="c_beard"></div></div>
+      </div>
+      <div class="step" id="st4">
         <div class="grp"><h4>Hair style</h4><div class="chips" id="c_style"></div></div>
         <div class="grp"><h4>Hair color: <span id="n_hair"></span></h4><div class="sws" id="c_hair"></div></div>
       </div>
-      <div class="step" id="st4"><div class="grp"><h4>Outfit</h4><div class="chips" id="c_outfit"></div></div></div>
       <div class="step" id="st5">
+        <div class="grp"><h4>Outfit</h4><div class="chips" id="c_outfit"></div></div>
         <div class="grp"><h4>Top color: <span id="n_top"></span></h4><div class="sws" id="c_top"></div></div>
         <div class="grp"><h4 id="h_acc">Accent: <span id="n_acc"></span></h4><div class="sws" id="c_acc"></div></div>
       </div>
       <div class="step" id="st6">
+        <div class="grp"><h4>Bottoms</h4><div class="chips" id="c_bottom"></div></div>
+        <div class="grp"><h4>Bottoms color: <span id="n_bcol"></span> <small class="hint">(overalls use their own color)</small></h4><div class="sws" id="c_bcol"></div></div>
+        <div class="grp"><h4>Shoes</h4><div class="chips" id="c_shoes"></div></div>
+        <div class="grp"><h4>Shoe color: <span id="n_scol"></span></h4><div class="sws" id="c_scol"></div></div>
+      </div>
+      <div class="step" id="st7">
+        <div class="tabs" id="acctabs"><button data-tab="glasses" class="on">Glasses</button><button data-tab="hat">Hats</button><button data-tab="neck">Neckwear</button><button data-tab="ears">Earrings</button></div>
+        <div class="tabpane on" id="p_glasses"><div class="chips" id="c_glasses"></div></div>
+        <div class="tabpane" id="p_hat"><div class="chips" id="c_hat"></div></div>
+        <div class="tabpane" id="p_neck"><div class="chips" id="c_neck"></div></div>
+        <div class="tabpane" id="p_ears"><div class="chips" id="c_ears"></div></div>
+        <div class="grp" style="margin-top:14px"><h4>Accessory color: <span id="n_ac"></span></h4><div class="sws" id="c_ac"></div></div>
+      </div>
+      <div class="step" id="st8">
         <div class="grp"><h4>Your name</h4><input type="text" id="nm" maxlength="14" placeholder="Enter your name"></div>
         <div class="grp"><h4>Customers will call you</h4><div class="opts" id="ti"></div></div>
       </div>
@@ -78,6 +101,7 @@
   </div>
   <div class="wnav">
     <button id="wback" class="gray">Back</button>
+    <button id="wcancel" class="gray" style="display:none">Cancel</button>
     <span class="spacer"></span>
     <button id="wskip" class="link">Skip customizing</button>
     <button id="wnext">Next</button>
@@ -130,6 +154,7 @@
   <div class="mbtns2">
     <button id="resume">Resume</button>
     <button id="phow" class="alt">How to Play</button>
+    <button id="pedit" class="alt">Customize Character</button>
     <button id="psets" class="alt">Settings</button>
     <button id="quit" class="gray">Quit to Menu</button>
   </div>
@@ -144,6 +169,8 @@
   <label class="srow">Difficulty
     <select id="set_diff"><option value="relaxed">Relaxed</option><option value="normal">Normal</option><option value="rush">Rush hour</option></select></label>
   <label class="srow">Show totals (easy mode) <input type="checkbox" id="set_easy"></label>
+  <label class="srow">Unlock all styles (preview) <input type="checkbox" id="set_unlock"></label>
+  <label class="srow" id="sedit_row">Your character <button id="sedit" class="alt small">Customize</button></label>
   <label class="srow" id="fsrow">Full screen <button id="sfull" class="alt small">Toggle</button></label>
   <p class="hint">Settings are saved on this device.</p>
   <button id="sclose">Done</button>
@@ -166,6 +193,7 @@
 <div id="rotate"><div class="phone"></div><p>Please rotate your phone to landscape</p></div>
 <div id="toast"></div>
 <script src="audio.js"></script>
+<script src="char.js"></script>
 <script src="game.js"></script>
 <script src="creator.js"></script>
 <script src="ui.js"></script>
