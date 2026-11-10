@@ -9,7 +9,7 @@ function saveSet() { try { localStorage.setItem('tusok-set', JSON.stringify(S.se
 function syncSet() {
   $('#set_sfx').value = S.set.sfx; $('#set_amb').value = S.set.amb; $('#set_diff').value = S.set.diff;
   $('#set_easy').checked = S.set.easy; $('#set_unlock').checked = S.set.unlockAll;
-  $('#sbtn').textContent = 'Sound: ' + (S.set.mute ? 'Off' : 'On');
+  $('#sbtn').textContent = S.set.mute ? 'Muted' : 'Sound';
   $('#msound').classList.toggle('off', S.set.mute);
   SND.vol();
 }
@@ -55,6 +55,8 @@ function menuArt() {
   /* change how your character looks, even in the middle of a game */
   const edit = () => { ov('settings', false); openEditor(); };
   $('#sedit').onclick = edit; $('#pedit').onclick = edit;
+  $('#mapbtn').onclick = openMap; $('#pmap').onclick = openMap; $('#mapclose').onclick = closeMap;
+  $('#sreset').onclick = () => { if (confirm('Reset your level, earnings and unlocks? Your character look is kept.')) { try { ['tusok-save', 'tusok-best'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* ignore */ } location.reload(); } };
   $('#hclose').onclick = () => ov('howm', false);
   $('#sclose').onclick = () => ov('settings', false);
   $('#pbtn').onclick = openPause;
@@ -88,6 +90,7 @@ function menuArt() {
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
     if (isOn('settings')) return ov('settings', false);
     if (isOn('howm')) return ov('howm', false);
+    if (isOn('mapm')) return closeMap();
     if (isOn('pausem')) return closePause();
     if (S.on && !isOn('modal')) openPause();
   });

@@ -12,9 +12,9 @@ const STYLES = [['short', 'Short'], ['bob', 'Bob'], ['straight', 'Straight'], ['
 const OUTFITS = [['school', 'School uniform'], ['apron', 'Vendor apron'], ['tee', 'Casual tee'], ['overalls', 'Overalls'], ['polo', 'Retro polo'], ['jersey', 'Jersey'], ['hoodie', 'Hoodie'], ['barong', 'Barong']];
 const BOTTOMS = [['jeans', 'Jeans'], ['slacks', 'Slacks'], ['shorts', 'Shorts'], ['skirt', 'Skirt'], ['pleated', 'Pleated skirt']];
 const SHOES = [['sneakers', 'Sneakers'], ['school', 'School shoes'], ['tsinelas', 'Tsinelas'], ['boots', 'Boots'], ['barefoot', 'Barefoot']];
-const GLASSL = [['none', 'None'], ['round', 'Round'], ['square', 'Square'], ['cat', 'Cat-eye'], ['shades', 'Shades']];
-const HATL = [['none', 'None'], ['cap', 'Cap'], ['clip', 'Hair clip'], ['beanie', 'Beanie'], ['salakot', 'Salakot'], ['bucket', 'Bucket hat'], ['bandana', 'Bandana'], ['headband', 'Headband'], ['bow', 'Bow'], ['flowers', 'Flowers'], ['headphones', 'Headphones'], ['sunnies', 'Sunnies on head']];
-const NECKL = [['none', 'None'], ['scarf', 'Scarf'], ['bowtie', 'Bow tie'], ['necklace', 'Necklace'], ['sampaguita', 'Sampaguita']];
+const GLASSL = [['none', 'None'], ['round', 'Round'], ['square', 'Square'], ['cat', 'Cat-eye'], ['shades', 'Shades'], ['heart', 'Heart shades']];
+const HATL = [['none', 'None'], ['cap', 'Cap'], ['clip', 'Hair clip'], ['beanie', 'Beanie'], ['salakot', 'Salakot'], ['bucket', 'Bucket hat'], ['bandana', 'Bandana'], ['headband', 'Headband'], ['bow', 'Bow'], ['flowers', 'Flowers'], ['headphones', 'Headphones'], ['sunnies', 'Sunnies on head'], ['chef', 'Chef hat'], ['crown', 'Crown']];
+const NECKL = [['none', 'None'], ['scarf', 'Scarf'], ['bowtie', 'Bow tie'], ['necklace', 'Necklace'], ['sampaguita', 'Sampaguita'], ['medal', 'Medal']];
 const EARL = [['none', 'None'], ['studs', 'Studs'], ['hoops', 'Hoops']];
 const OUTX = { school: ['collar', 'id'], apron: ['apron'], tee: ['tee'], overalls: ['overalls'], polo: ['polo'], jersey: ['jersey'], hoodie: ['hoodie'], barong: ['barong'] };
 const ACC = { school: 'ID lace and badge color', apron: 'Apron color', tee: 'Print color', overalls: 'Overalls color', polo: 'Collar color', jersey: 'Trim and number color', hoodie: 'Drawstring color', barong: 'Embroidery color' };
@@ -28,7 +28,8 @@ const LOCK = {
   'glasses:round': 2, 'glasses:square': 2, 'glasses:cat': 3, 'glasses:shades': 4,
   'hat:beanie': 2, 'hat:bow': 2, 'hat:bucket': 3, 'hat:sunnies': 3, 'hat:headphones': 4, 'hat:flowers': 4, 'hat:salakot': 5,
   'neck:necklace': 2, 'neck:scarf': 2, 'neck:bowtie': 3, 'neck:sampaguita': 4,
-  'ears:studs': 2, 'ears:hoops': 3
+  'ears:studs': 2, 'ears:hoops': 3,
+  'hat:chef': 6, 'glasses:heart': 7, 'hat:crown': 8, 'neck:medal': 9
 };
 const unlockedLv = () => S.set.unlockAll ? 99 : Math.max(S.best || 1, S.level || 1);
 const isFree = (key, v) => (LOCK[key + ':' + v] || 1) <= unlockedLv();

@@ -85,6 +85,8 @@ function hatSvg(hat, c) {
     case 'sunnies': return `<g transform="rotate(-4 60 10)"><rect x="35" y="3" width="20" height="12" rx="5.5" fill="#1d1d1d" stroke="${c}" stroke-width="2"/><rect x="65" y="3" width="20" height="12" rx="5.5" fill="#1d1d1d" stroke="${c}" stroke-width="2"/><path d="M55 8H65" stroke="${c}" stroke-width="2.2"/><path d="M40 6l5 0M70 6l5 0" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/></g>`;
     case 'flowers': return [[36, 26], [46, 16], [60, 12], [74, 16], [84, 26]].map(([x, y], i) => `<g><circle cx="${x}" cy="${y}" r="5.4" fill="${i % 2 ? lt(c, .35) : c}"/><circle cx="${x}" cy="${y}" r="2" fill="#ffd166"/></g>`).join('') + '<path d="M30 30Q60 4 90 30" stroke="#5a9e3a" stroke-width="1.6" fill="none"/>';
     case 'headphones': return `<path d="M30 44Q28 5 60 5Q92 5 90 44" fill="none" stroke="#3a3a3a" stroke-width="5"/><rect x="23" y="38" width="13" height="22" rx="6" fill="${c}" stroke="#000" stroke-opacity=".3"/><rect x="84" y="38" width="13" height="22" rx="6" fill="${c}" stroke="#000" stroke-opacity=".3"/>`;
+    case 'chef': return '<path d="M33 30Q25 18 36 12Q36 2 53 3Q60 -1 67 3Q84 2 84 12Q95 18 87 30Z" fill="#fff" stroke="#d9d2c0" stroke-width="1.2"/><rect x="33" y="28" width="54" height="9" rx="3" fill="#f6f6f6" stroke="#d9d2c0" stroke-width="1.2"/><path d="M46 12V26M60 8V26M74 12V26" stroke="#e4ddca" stroke-width="1.2"/>';
+    case 'crown': return `<path d="M34 28L38 8L48 18L60 4L72 18L82 8L86 28Z" fill="#f4c430" stroke="#a8761f" stroke-width="1.5" stroke-linejoin="round"/><rect x="34" y="26" width="52" height="7" rx="2" fill="#e0a82e" stroke="#a8761f" stroke-width="1.2"/><circle cx="48" cy="29.5" r="2" fill="${c}"/><circle cx="60" cy="29.5" r="2" fill="#5aa9e6"/><circle cx="72" cy="29.5" r="2" fill="${c}"/>`;
     case 'helmet': return '<path d="M30 30Q32 3 60 3Q88 3 90 30Z" fill="#f4c430"/><rect x="27" y="28" width="66" height="8" rx="4" fill="#f4c430"/>';
   }
   return '';
@@ -95,6 +97,7 @@ function glassesSvg(g, c) {
   if (g === 'round') return `<g fill="${lens}"${lo} stroke="${fr}" stroke-width="2"><circle cx="48" cy="47" r="9.5"/><circle cx="72" cy="47" r="9.5"/></g><path d="M57.5 46H62.5M38.5 46H33M81.5 46H87" stroke="${fr}" stroke-width="2"/>`;
   if (g === 'square') return `<g fill="${lens}"${lo} stroke="${fr}" stroke-width="2"><rect x="38.5" y="39" width="19" height="16" rx="3.5"/><rect x="62.5" y="39" width="19" height="16" rx="3.5"/></g><path d="M57.5 44H62.5M38.5 44H33M81.5 44H87" stroke="${fr}" stroke-width="2"/>`;
   if (g === 'cat') return `<g fill="${lens}"${lo} stroke="${c}" stroke-width="2.2" stroke-linejoin="round"><path d="M38 40L57 43Q58 54 50 55Q41 56 38 48Z"/><path d="M82 40L63 43Q62 54 70 55Q79 56 82 48Z"/></g><path d="M57 44H63M38 42H33M82 42H87" stroke="${c}" stroke-width="2"/>`;
+  if (g === 'heart') return `<g fill="${c}" fill-opacity=".35" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"><path d="M48 56C37 49 36 41 42 39.5C45.5 38.6 48 41 48 43C48 41 50.5 38.6 54 39.5C60 41 59 49 48 56Z"/><path d="M72 56C61 49 60 41 66 39.5C69.5 38.6 72 41 72 43C72 41 74.5 38.6 78 39.5C84 41 83 49 72 56Z"/></g><path d="M57 44H63M38 42H33M82 42H87" stroke="${c}" stroke-width="2"/>`;
   if (g === 'shades') return `<g fill="#1d1d1d" stroke="#000" stroke-width="1.5"><rect x="38.5" y="40" width="20" height="14" rx="6"/><rect x="61.5" y="40" width="20" height="14" rx="6"/></g><path d="M43 43L49 43M66 43L72 43" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/><path d="M58.5 44H61.5M38.5 44H33M81.5 44H87" stroke="#000" stroke-width="2"/>`;
   return '';
 }
@@ -104,6 +107,7 @@ function neckSvg(n, c) {
   if (n === 'scarf') return `<path d="M44 66Q60 82 76 66L80 80Q60 94 40 80Z" fill="${c}"/><path d="M40 80Q60 94 80 80" stroke="${d}" stroke-width="1.4" fill="none"/><path d="M62 82L76 106L66 108L58 88Z" fill="${d}"/>`;
   if (n === 'bowtie') return `<path d="M60 74L44 66V82Z" fill="${c}"/><path d="M60 74L76 66V82Z" fill="${c}"/><rect x="56" y="70" width="8" height="9" rx="3" fill="${d}"/>`;
   if (n === 'necklace') return `<path d="M47 68Q60 90 73 68" stroke="#e8b923" stroke-width="2" fill="none"/><circle cx="60" cy="85" r="4.2" fill="${c}" stroke="#a8761f" stroke-width="1"/>`;
+  if (n === 'medal') return `<path d="M46 68L58 90M74 68L62 90" stroke="${c}" stroke-width="5"/><circle cx="60" cy="95" r="8.5" fill="#f4c430" stroke="#a8761f" stroke-width="2"/><path d="M60 89l2 4 4 .6-3 3 .8 4.2-3.8-2-3.8 2 .8-4.2-3-3 4-.6z" fill="#fff" fill-opacity=".6"/>`;
   if (n === 'sampaguita') return [[44, 68], [46, 74], [50, 80], [55, 85], [60, 87], [65, 85], [70, 80], [74, 74], [76, 68]].map(([x, y]) => `<g><circle cx="${x}" cy="${y}" r="3.6" fill="#fff" stroke="#d9d2b8" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="1.1" fill="#f4d35e"/></g>`).join('');
   return '';
 }

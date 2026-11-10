@@ -11,23 +11,40 @@ const FD = {
   squid: { n: 'Squidballs', p: 10, lv: 2, c: '#f08a6c', tl: 'squidballs' },
   kwek: { n: 'Kwek-kwek', p: 10, lv: 3, c: '#f4a024', tl: 'kwek-kwek' },
   hotdog: { n: 'Hotdog', p: 15, lv: 4, c: '#c9362f', tl: 'hotdog' },
+  banana: { n: 'Banana cue', p: 12, lv: 6, c: '#d9972f', tl: 'banana cue' },
+  camote: { n: 'Camote cue', p: 10, lv: 7, c: '#e8943a', tl: 'camote cue' },
+  turon: { n: 'Turon', p: 15, lv: 8, c: '#e0a640', tl: 'turon' },
+  maruya: { n: 'Maruya', p: 18, lv: 9, c: '#e6b85c', tl: 'maruya' },
   palamig: { n: 'Palamig', p: 15, lv: 5, tl: 'palamig' }
 };
-const FRY = ['fishball', 'kikiam', 'squid', 'kwek', 'hotdog'];
+const FRY = ['fishball', 'kikiam', 'squid', 'kwek', 'hotdog', 'banana', 'camote', 'turon', 'maruya'];
 const SA = {
   sweet: { n: 'Sweet', c: '#7b2d12', tl: 'sweet sauce' },
   spicy: { n: 'Sweet & Spicy', c: '#c1121f', tl: 'tamis-anghang' },
   vinegar: { n: 'Spicy Vinegar', c: '#b9962a', tl: 'maanghang na suka' }
 };
-const TH = [0, 0, 100, 250, 450, 700, 1000], RAW = 4000, BURN = 9500, N = 8;
+/* 40 levels. TH[L] = total pesos earned to reach level L. Levels 1-9 climb steadily, then each chapter of 10 levels has a flat cost. */
+const MAXLV = 40, RAW = 4000, BURN = 9500, N = 8;
+const TH = [0, 0];
+for (let L = 2; L <= MAXLV; L++) TH[L] = TH[L - 1] + (L <= 9 ? 50 * L : L <= 19 ? 500 : L <= 29 ? 700 : 900);
+const levelFor = e => { let L = 1; for (let i = 2; i <= MAXLV; i++) if (e >= TH[i]) L = i; return L; };
+const STARTS = { 10: 1, 20: 2, 30: 3 };   /* level -> index of the stand that opens (see STANDS in map.js) */
 const DM = { relaxed: .7, normal: 1, rush: 1.35 };
 const DEF = { sfx: .7, amb: .35, diff: 'normal', easy: false, mute: false, unlockAll: false };
 function loadBest() { try { return +localStorage.getItem('tusok-best') || 1; } catch (e) { return 1; } }
 function saveBest() { try { localStorage.setItem('tusok-best', S.best); } catch (e) { /* storage blocked */ } }
+/* progress is saved after every customer, so a 40 level game can be played over many sessions */
+function saveGame() { try { localStorage.setItem('tusok-save', JSON.stringify({ earned: S.earned, served: S.served, mastered: S.mastered })); } catch (e) { /* storage blocked */ } }
+function loadGame() {
+  try {
+    const d = JSON.parse(localStorage.getItem('tusok-save') || 'null');
+    if (d) { S.earned = d.earned || 0; S.served = d.served || 0; S.mastered = !!d.mastered; S.level = levelFor(S.earned); S.best = Math.max(S.best, S.level); }
+  } catch (e) { /* ignore bad data */ }
+}
 function loadSet() { try { return { ...DEF, ...JSON.parse(localStorage.getItem('tusok-set') || '{}') }; } catch (e) { return { ...DEF }; } }
 const CAP = l => l >= 4 ? 3 : l >= 2 ? 2 : 1;
 const SEATS = { 1: [50], 2: [30, 70], 3: [17, 50, 83] };
-const UNL = { 2: [{ k: 'squid' }, { cap: 2 }], 3: [{ k: 'kwek' }], 4: [{ k: 'hotdog' }, { cap: 3 }], 5: [{ k: 'palamig' }] };
+const UNL = { 2: [{ k: 'squid' }, { cap: 2 }], 3: [{ k: 'kwek' }], 4: [{ k: 'hotdog' }, { cap: 3 }], 5: [{ k: 'palamig' }], 6: [{ k: 'banana' }], 7: [{ k: 'camote' }], 8: [{ k: 'turon' }], 9: [{ k: 'maruya' }] };
 const DEN = [1, 5, 10, 20, 50, 100];
 const SK = ['#f0bf94', '#e0a97c', '#c98f61', '#a8714a', '#8d5a3a'], HC = ['#2b1a12', '#1b120d', '#4a2c17', '#6b3e1f'];
 /* 8 customer types, each with its own look and several Tagalog lines. o = order text, t = Ate/Kuya, n = player name */
@@ -58,6 +75,10 @@ function food(k) {
   if (k === 'kikiam') s = [8, 25, 42].map(y => `<rect x="19" y="${y}" width="22" height="15" rx="6" fill="${c}" stroke="#0004"/><path d="M24 ${y + 5}h12M24 ${y + 10}h12" stroke="#d9904a" stroke-width="1.6"/>`).join('');
   if (k === 'kwek') s = [18, 42].map(y => `<circle cx="30" cy="${y}" r="13" fill="${c}" stroke="#a8661a" stroke-width="1.5"/><circle cx="25" cy="${y - 3}" r="2" fill="#ffe08a"/><circle cx="34" cy="${y + 4}" r="2.4" fill="#ffe08a"/>`).join('');
   if (k === 'hotdog') s = `<rect x="21" y="5" width="18" height="50" rx="9" fill="${c}" stroke="#6a1510"/><path d="M21 17l18 6M21 30l18 6M21 43l18 6" stroke="#6a1510" stroke-width="1.6"/><rect x="25" y="9" width="3" height="30" rx="1.5" fill="#fff6"/>`;
+  if (k === 'banana') s = [16, 44].map(y => `<ellipse cx="30" cy="${y}" rx="9" ry="13" fill="${c}" stroke="#7a4a12"/><path d="M25 ${y - 8}Q23 ${y} 25 ${y + 8}" stroke="#fff" stroke-opacity=".45" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="34" cy="${y - 3}" r="1.2" fill="#7a4a12"/><circle cx="33" cy="${y + 5}" r="1.2" fill="#7a4a12"/>`).join('');
+  if (k === 'camote') s = [8, 24, 40].map(y => `<rect x="19" y="${y}" width="22" height="15" rx="5" fill="${c}" stroke="#a8591a"/><path d="M23 ${y + 4}h8" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/><circle cx="36" cy="${y + 10}" r="1.1" fill="#7a3a10"/><circle cx="29" cy="${y + 11}" r="1.1" fill="#7a3a10"/>`).join('');
+  if (k === 'turon') s = `<rect x="20" y="5" width="20" height="50" rx="10" fill="${c}" stroke="#8a5a1a"/><path d="M20 16l20 6M20 28l20 6M20 40l20 6" stroke="#a8661a" stroke-width="1.5"/><path d="M25 10V40" stroke="#fff" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/><circle cx="35" cy="20" r="1.4" fill="#7a3a10"/><circle cx="32" cy="42" r="1.4" fill="#7a3a10"/>`;
+  if (k === 'maruya') s = [17, 43].map(y => `<ellipse cx="30" cy="${y}" rx="14" ry="11" fill="${c}" stroke="#a8761f"/><path d="M20 ${y - 3}Q30 ${y - 9} 40 ${y - 3}" stroke="#fff" stroke-opacity=".5" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="24" cy="${y + 4}" r="1.2" fill="#fff"/><circle cx="34" cy="${y + 5}" r="1.2" fill="#fff"/><circle cx="37" cy="${y - 1}" r="1.2" fill="#fff"/>`).join('');
   return `<svg viewBox="0 0 60 60" class="fd"><g transform="rotate(-35 30 30)"><rect x="28" y="-8" width="4" height="76" rx="2" fill="#d9b382"/>${s}</g></svg>`;
 }
 const cup = () => '<svg viewBox="0 0 40 60"><path d="M26 2L22 30" stroke="#e63946" stroke-width="4" stroke-linecap="round"/><path d="M6 14H34L30 56H10Z" fill="#ffe8cc" stroke="#7a5230" stroke-width="2"/><path d="M8 26H32L29.6 54H10.4Z" fill="#ff8c42"/><rect x="13" y="30" width="8" height="8" rx="2" fill="#fff8"/><rect x="21" y="38" width="7" height="7" rx="2" fill="#fff8"/></svg>';
@@ -95,11 +116,10 @@ function build() {
   const jg = el('button', 'jugbtn', `<div class="jug"></div><span id="pl"></span>`);
   jg.id = 'pal'; jg.onclick = pour; $('#jars').append(jg);
   FRY.forEach(k => {
-    const b = el('button', 'bin', `${food(k)}<div><span>${FD[k].n}</span><em>₱${FD[k].p} each</em></div>`);
+    const b = el('button', 'bin', `${food(k)}<div><span>${FD[k].n}</span><em>₱${FD[k].p}</em></div>`);
     b.id = 'b_' + k; b.dataset.lock = `Unlocks at Level ${FD[k].lv}`; b.onclick = () => fry(k);
     $('#tray').append(b);
   });
-  $('#tray').append(el('div', 'sign', 'Tap a food to fry it'));
   for (let i = 0; i < N; i++) { const d = el('div', 'slot'); d.onclick = () => takeSlot(i); $('#slots').append(d); slotEls.push(d); }
   $('#cash').innerHTML = '<div class="cinfo" id="cinfo"></div><div class="cgrid" id="cgrid"></div><div class="cgive" id="cgive"></div><div class="crow"><button id="cgo">Give change</button><button id="cclr" class="gray">Clear</button></div>';
   DEN.forEach(d => { const b = el('button', 'den', d < 20 ? coin(d) : bill(d)); b.onclick = () => { if (payer()) { S.give.push(d); SND.clink(d); drawCash(); } }; $('#cgrid').append(b); });
@@ -112,7 +132,7 @@ function build() {
 }
 function start() {
   S.name = $('#nm').value.trim() || 'Juan';
-  applyLook();
+  loadGame(); applyLook();
   show(''); $('#game').classList.add('on');
   document.body.classList.add('ingame'); S.on = true; S.nextSpawn = Date.now() + 700; SND.init(); SND.loop(); syncSet();
   draw(); setInterval(tick, 200); setInterval(bubbles, 260);
@@ -225,11 +245,22 @@ function giveChange() {
   if (sum(S.give) !== c.change) { S.give = []; drawCash(); return toast('That is not the right change. Try again.', 1); }
   S.earned += c.total + c.tip; S.served++; SND.kaching();
   toast(`Thank you! +₱${c.total}${c.tip ? ` and ₱${c.tip} tip` : ''}`);
-  const old = S.level; for (let i = 2; i <= 5; i++) if (S.earned >= TH[i]) S.level = i;
+  const old = S.level; S.level = levelFor(S.earned);
   if (S.level > S.best) { S.best = S.level; saveBest(); }
   removeCust(c, 'happy');
-  for (let l = old + 1; l <= S.level; l++) { S.queue.push({ t: 'lv', l }); (UNL[l] || []).forEach(u => S.queue.push({ t: 'un', u, l })); if (accNew(l).length) S.queue.push({ t: 'acc', l }); }
-  if (!S.mastered && S.earned >= TH[6]) { S.mastered = true; S.queue.push({ t: 'win' }); }
+  levelUp(old); saveGame();
+}
+/* one popup per level up (kept short after level 9), plus unlock, accessory, chapter and victory popups */
+function levelUp(old) {
+  for (let l = old + 1; l <= S.level; l++) {
+    const extras = (UNL[l] || []).length || accNew(l).length;
+    if (STARTS[l]) S.queue.push({ t: 'chap', l });
+    else if (l <= 9 || extras) S.queue.push({ t: 'lv', l });
+    else setTimeout(() => { toast(`Level ${l}!`); SND.fanfare(); }, 2300);
+    (UNL[l] || []).forEach(u => S.queue.push({ t: 'un', u, l }));
+    if (accNew(l).length) S.queue.push({ t: 'acc', l });
+  }
+  if (!S.mastered && S.level >= MAXLV) { S.mastered = true; S.queue.push({ t: 'win' }); }
   if (S.queue.length) { hold(); nextPopup(); }
 }
 const payer = () => { const c = tgt(); return c && c.phase === 'pay' ? c : null; };
@@ -243,11 +274,14 @@ function nextPopup() {
   }
   let h, ic, d;
   $('#mc2').style.display = q.t === 'win' ? 'inline-block' : 'none';
-  ({ lv: () => SND.fanfare(), un: () => SND.unlock(), acc: () => SND.unlock(), win: () => SND.win() })[q.t]();
+  ({ lv: () => SND.fanfare(), un: () => SND.unlock(), acc: () => SND.unlock(), chap: () => SND.fanfare(), win: () => SND.win() })[q.t]();
   if (q.t === 'win') {
-    h = 'Level 5 complete!';
+    h = 'You mastered the market!';
     ic = '<svg viewBox="0 0 80 80"><path d="M22 10h36v18a18 18 0 0 1-36 0z" fill="#f4c430" stroke="#a8661a" stroke-width="3"/><path d="M22 14H10q0 18 14 20M58 14h12q0 18-14 20" fill="none" stroke="#a8661a" stroke-width="4"/><rect x="34" y="44" width="12" height="14" fill="#e0a82e"/><rect x="24" y="58" width="32" height="10" rx="3" fill="#a8661a"/></svg>';
-    d = `Master Vendor! You earned ₱${S.earned} and served ${S.served} customers. Aling Nena says: "Ikaw na ang pinakamagaling kong katulong sa kariton, ${S.name}!" Keep playing with faster customers, or head back to the menu.`;
+    d = `Level ${MAXLV}! You earned ₱${S.earned} and served ${S.served} customers. Aling Nena says: "Ikaw na ang pinakamagaling kong katulong, ${S.name}!" Keep playing with faster customers, or head back to the menu.`;
+  } else if (q.t === 'chap') {
+    const i = STARTS[q.l], st = STANDS[i]; h = `Chapter ${i} complete!`; ic = standIcon(i);
+    d = st.built ? `The ${st.name} is open! Open the Market Map from the Pause menu to visit it.` : `Aling Nena is building the ${st.name}. It opens in the next update. Keep leveling up and it will be ready.`;
   } else if (q.t === 'acc') {
     const n = accNew(q.l); h = 'New styles unlocked!'; ic = previewWith(n[0].key, n[0].val);
     d = `You can now wear: ${n.map(i => i.label).join(', ')}. Open Customize in the Pause menu to try ${n.length > 1 ? 'them' : 'it'} on.`;
@@ -271,7 +305,7 @@ function tick() {
   if (!S.on || S.paused) return;
   SND.sizzle(S.slots.filter(s => s && state(s) !== 'burnt').length);
   S.custs.slice().forEach(c => {
-    c.pat -= (c.rushed ? .55 : .33) * DM[S.set.diff] * (S.mastered ? 1.15 : 1);
+    c.pat -= (c.rushed ? .55 : .33) * DM[S.set.diff] * (S.mastered ? 1.15 : 1) * (1 + .008 * Math.max(0, S.level - 5));
     const bar = c.el.querySelector('.pat i');
     bar.style.width = Math.max(0, c.pat) + '%'; bar.style.background = c.pat < 35 ? '#d9534f' : c.pat < 60 ? '#f4a261' : '';
     const m = c.pat < 35 ? 'angry' : 'neutral';
@@ -295,8 +329,8 @@ function draw() {
   S.custs.forEach(c => c.el.classList.toggle('sel', c.id === S.sel));
   $('#lv').textContent = S.level; $('#cn').textContent = S.earned; $('#sv').textContent = S.served; $('#cc').textContent = `${S.custs.length}/${CAP(S.level)}`;
   const lo = TH[S.level], hi = TH[S.level + 1];
-  $('#xp').style.width = S.mastered ? '100%' : Math.min(100, (S.earned - lo) / (hi - lo) * 100) + '%';
-  $('#nx').textContent = S.mastered ? 'Master Vendor!' : S.level < 5 ? `₱${hi} for Level ${S.level + 1}` : `₱${hi} to master the cart`;
+  $('#xp').style.width = S.mastered || !hi ? '100%' : Math.min(100, (S.earned - lo) / (hi - lo) * 100) + '%';
+  $('#nx').textContent = S.mastered || !hi ? 'Market Master!' : `₱${hi} for Level ${S.level + 1}`;
   FRY.forEach(k => $('#b_' + k).classList.toggle('locked', FD[k].lv > S.level));
   $('#pal').disabled = S.level < 5; $('#pl').textContent = S.level < 5 ? 'Palamig (Lv 5)' : 'Palamig ₱15';
   const c = tgt(), bg = c && c.phase === 'order' ? c.bag : {}, ks = Object.keys(bg).filter(k => bg[k] > 0), got = c && c.phase === 'order' ? c.got : null;

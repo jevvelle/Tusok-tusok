@@ -116,7 +116,7 @@
     <div class="lvl">Level <b id="lv">1</b><div class="bar"><i id="xp"></i></div><small id="nx"></small></div>
     <div class="stat">₱<b id="cn">0</b> earned · <b id="sv">0</b> served · counter <b id="cc">0/1</b></div>
     <span class="spacer"></span>
-    <button id="fsbtn" class="hb">Full screen</button><button id="sbtn" class="hb gray">Sound: On</button><button id="pbtn" class="hb">Pause</button>
+    <button id="mapbtn" class="hb alt">Map</button><button id="fsbtn" class="hb">Full</button><button id="sbtn" class="hb gray">Sound</button><button id="pbtn" class="hb">Pause</button>
   </div>
 
   <div class="sky"></div><div class="bld b1"></div><div class="bld b2"></div><div class="bld b3"></div><div class="bld b4"></div><div class="road"></div>
@@ -147,6 +147,15 @@
   <button id="mc">Continue</button> <button id="mc2" class="alt">Main menu</button>
 </div></div>
 
+<!-- market map -->
+<div class="ov" id="mapm"><div class="mapcard">
+  <div class="maphead"><h2>Aling Nena's Market</h2>
+    <div class="mapinfo"><b id="maplv"></b> <span id="mapchap"></span><div class="mbar"><i id="mapbar"></i></div></div></div>
+  <div id="mapsvg"></div>
+  <div class="maplist" id="maplist"></div>
+  <button id="mapclose">Back to the cart</button>
+</div></div>
+
 <!-- pause menu -->
 <div class="ov" id="pausem"><div class="mcard">
   <h2>Paused</h2>
@@ -154,6 +163,7 @@
   <div class="mbtns2">
     <button id="resume">Resume</button>
     <button id="phow" class="alt">How to Play</button>
+    <button id="pmap" class="alt">Market Map</button>
     <button id="pedit" class="alt">Customize Character</button>
     <button id="psets" class="alt">Settings</button>
     <button id="quit" class="gray">Quit to Menu</button>
@@ -172,6 +182,7 @@
   <label class="srow">Unlock all styles (preview) <input type="checkbox" id="set_unlock"></label>
   <label class="srow" id="sedit_row">Your character <button id="sedit" class="alt small">Customize</button></label>
   <label class="srow" id="fsrow">Full screen <button id="sfull" class="alt small">Toggle</button></label>
+  <label class="srow">Progress <button id="sreset" class="gray small">Reset</button></label>
   <p class="hint">Settings are saved on this device.</p>
   <button id="sclose">Done</button>
 </div></div>
@@ -185,7 +196,7 @@
     <li>Tap the sauce jar they asked for (and the palamig jug once unlocked), then press Hand over order.</li>
     <li>The customer pays with a bill or coins. Work out the total from the prices on the bins, tap bills and coins in the cash drawer to give the exact change, then press Give change.</li>
     <li>Fast service earns tips. Wait too long and customers leave. Earn pesos to level up, unlock new food, and open more counter spots.</li>
-    <li>Reach Level 5 and earn ₱1000 to become a Master Vendor.</li>
+    <li>Level up from 1 to 40. Every 10 levels Aling Nena opens a new stand. Check the Market Map to see them all.</li>
   </ol>
   <button id="hclose">Got it</button>
 </div></div>
@@ -196,5 +207,6 @@
 <script src="char.js"></script>
 <script src="game.js"></script>
 <script src="creator.js"></script>
+<script src="map.js"></script>
 <script src="ui.js"></script>
 </body></html>

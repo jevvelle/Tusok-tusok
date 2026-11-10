@@ -242,10 +242,10 @@ input[type=text]{width:100%;padding:12px 16px;border-radius:999px;border:3px sol
 .bagb .sau{position:absolute;z-index:3;left:50%;bottom:10%;transform:translateX(-50%);font-size:max(10px,.95cqw);background:var(--c);color:#fff;padding:1px 8px;border-radius:9px;white-space:nowrap}
 .bagb.empty .front::after{content:'No bag yet';position:absolute;inset:0;display:grid;place-items:center;font-size:max(10px,1cqw);opacity:.6}
 
-.fore{left:0;right:0;bottom:0;height:38%;z-index:5;display:grid;grid-template-columns:27% 42% 31%;align-items:center;gap:.6%;padding:.8% 1.5%;background:linear-gradient(#7a4a2b,#4f2d19);border-top:.7cqw solid #3a2012;box-shadow:inset 0 .8cqw 0 #0002}
-.tray{display:grid;grid-template-columns:1fr 1fr;gap:.6cqw;align-content:center}
-.bin{background:#f4dfb2;color:var(--d);box-shadow:0 .3cqw 0 #0006;border:2px solid #7a5230;border-radius:1cqw;padding:.3cqw .5cqw;display:flex;align-items:center;gap:.4cqw;text-align:left;font-size:max(10px,1.02cqw);line-height:1.1;position:relative}
-.bin svg{width:3.2cqw;height:3.2cqw;flex:none}
+.fore{left:0;right:0;bottom:0;height:38%;z-index:5;display:grid;grid-template-columns:30% 41% 29%;align-items:center;gap:.6%;padding:.8% 1.5%;background:linear-gradient(#7a4a2b,#4f2d19);border-top:.7cqw solid #3a2012;box-shadow:inset 0 .8cqw 0 #0002}
+.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:.5cqw;align-content:center}
+.bin{background:#f4dfb2;color:var(--d);box-shadow:0 .3cqw 0 #0006;border:2px solid #7a5230;border-radius:1cqw;padding:.3cqw .2cqw;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center;font-size:max(9px,.92cqw);line-height:1.05;position:relative}
+.bin svg{width:2.8cqw;height:2.8cqw;flex:none}
 .bin span{display:block;font-weight:600}
 .bin em{font-style:normal;display:block;color:#a8452b;font-weight:600}
 .bin.locked{filter:grayscale(1) brightness(.8)}
@@ -366,3 +366,31 @@ input[type=text]{width:100%;padding:12px 16px;border-radius:999px;border:3px sol
 .micon.tall{height:200px}
 .micon.tall .ch{width:auto;height:190px}
 @media (max-height:620px){.micon.tall{height:150px!important}.micon.tall .ch{height:140px!important;width:auto!important}}
+
+/* ---------- market map ---------- */
+#mapm{z-index:120}
+.mapcard{background:var(--p);border:4px solid var(--d);border-radius:24px;padding:12px 16px;width:min(880px,98vw);max-height:calc(var(--vh) - 16px);display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 0 #0006;animation:pop .35s cubic-bezier(.3,1.5,.5,1)}
+.maphead{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.maphead h2{color:var(--t);font-size:1.4rem}
+.mapinfo{flex:1;min-width:220px;font-size:.9rem}
+.mbar{height:10px;margin-top:4px;border:2px solid var(--d);border-radius:9px;background:#fff;overflow:hidden}
+.mbar i{display:block;height:100%;width:0;background:var(--l);transition:width .3s}
+#mapsvg{flex:1;min-height:0;display:grid;place-items:center}
+#mapsvg svg{width:100%;height:auto;max-height:calc(var(--vh) - 200px);border-radius:16px;border:3px solid var(--d)}
+.stall{cursor:pointer}
+.stall .art{transition:transform .15s;transform-box:fill-box;transform-origin:50% 100%}
+.stall:hover .art{transform:scale(1.05)}
+.stall.locked .art{filter:grayscale(.95) brightness(.85)}
+.pin{animation:pinbob 1.4s ease-in-out infinite}
+@keyframes pinbob{50%{transform:translateY(-5px)}}
+.puff{animation:puff 2.6s ease-out infinite}
+.puff.p2{animation-delay:1.2s}
+@keyframes puff{from{transform:translateY(0);opacity:.8}to{transform:translateY(-26px);opacity:0}}
+.maplist{display:flex;gap:8px}
+.mcx{flex:1;background:#fff;color:var(--d);box-shadow:0 3px 0 #0003;border:3px solid transparent;border-radius:14px;padding:6px 10px;text-align:left;display:flex;flex-direction:column;font-size:.8rem;line-height:1.2}
+.mcx span{font-weight:600;color:#a8452b}
+.mcx.here{border-color:var(--t);background:#ffe3d6}
+.mcx.locked{opacity:.65}
+.mapcard>button{align-self:center}
+.stallicon{overflow:visible}
+@media (max-height:620px){.maphead h2{font-size:1.1rem}.mcx small{display:none}.mcx{padding:4px 8px}.maphead{gap:8px}}
