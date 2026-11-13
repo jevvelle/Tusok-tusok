@@ -65,7 +65,7 @@ function glassSvg(bag) {
   [['flan', '<rect x="0" y="0" width="20" height="13" rx="3" fill="#f2c14e" stroke="#b8862a"/><path d="M0 5Q10 2 20 5V3Q20 0 17 0H3Q0 0 0 3Z" fill="#a8571c"/>'],
    ['ube', '<circle cx="10" cy="7" r="9" fill="#8a4fbf"/><circle cx="7" cy="4" r="2.4" fill="#fff" fill-opacity=".4"/>'],
    ['icecream', '<circle cx="10" cy="6" r="9" fill="#ffc2d6" stroke="#e08aa8"/><circle cx="7" cy="3" r="2.4" fill="#fff" fill-opacity=".6"/>']
-  ].forEach(([k, g]) => { if (bag[k]) { s += `<g transform="translate(${tx} -2)">${g}</g>`; tx += 20; } });
+  ].forEach(([k, g]) => { if (bag[k]) { s += `<g transform="translate(${tx} 2)">${g}</g>`; tx += 20; } });
   return `<svg viewBox="0 0 100 150"><path d="M14 16H86L70 134Q70 142 62 142H38Q30 142 30 134Z" fill="#ffffff" fill-opacity=".28"/>${s}<path d="M14 16H86L70 134Q70 142 62 142H38Q30 142 30 134Z" fill="none" stroke="#d6eef7" stroke-width="3" stroke-linejoin="round"/><path d="M24 24L34 118" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/></svg>`;
 }
 const SHAVER = '<svg viewBox="0 0 60 70"><rect x="10" y="58" width="40" height="8" rx="3" fill="#7a8896"/><rect x="14" y="30" width="32" height="30" rx="4" fill="#9fb4c2" stroke="#5f7282" stroke-width="2"/><path d="M12 8H48L42 30H18Z" fill="#dff3fb" stroke="#9fd2e6" stroke-width="2"/><path d="M22 14l6 6M34 12l6 8" stroke="#b9dff0" stroke-width="2"/><rect x="22" y="40" width="16" height="10" rx="2" fill="#5f7282"/><g class="crank"><circle cx="52" cy="40" r="7" fill="#e63946" stroke="#7a1f27" stroke-width="2"/><rect x="50" y="34" width="4" height="12" fill="#fff" fill-opacity=".5"/></g></svg>';
@@ -135,3 +135,6 @@ function updateHalo() {
   $('#milkbtn').innerHTML = `${MILKCAN}<span>Pour milk</span>`; $('#milkbtn').onclick = () => addItem('milk');
   $('#glass').innerHTML = glassSvg({});
 })();
+
+STAND_FN[1] = { order: makeHaloOrder, tl: haloTl, ticket: haloTicket, tip: haloTip, render: renderGlass, update: updateHalo, tick: shaveStep, icon: hIcon, unlock: haloUnlockText, clr: 'Empty glass',
+  reset() { sh = null; $('#shaver').classList.remove('busy'); $('#shprog').style.width = '0'; } };

@@ -1,16 +1,17 @@
 'use strict';
 /* Market map: every stand, which are unlocked, and where you are. Loaded after creator.js. */
 const STANDS = [
-  { id: 'cart', name: 'Tusok-tusok Cart', from: 1, to: 9, built: true, c: '#E76F51' },
+  { id: 'cart', name: 'Tusok-Tusok Stand', from: 1, to: 9, built: true, c: '#E76F51' },
   { id: 'halo', name: 'Halo-Halo Stand', from: 10, to: 19, built: false, c: '#a35fc0' },
   { id: 'ihaw', name: 'Ihawan', from: 20, to: 29, built: false, c: '#c1442e' },
   { id: 'xmas', name: 'Simbang Gabi Stand', from: 30, to: 39, built: false, c: '#2a9d8f' }
 ];
 const SPOTS = [[120, 222], [320, 170], [540, 216], [700, 122]];
 const ROAD = 'M-20 300C130 300 170 262 260 262S410 306 520 292S650 214 820 210';
-let curStand = 0;
 const standOf = l => Math.min(3, l <= 9 ? 0 : l <= 19 ? 1 : l <= 29 ? 2 : 3);
-const standState = i => S.level < STANDS[i].from ? 'locked' : !STANDS[i].built ? 'soon' : i === curStand ? 'here' : 'open';
+const STAND_FN = {};   /* each stand registers: order tl ticket tip update tick reset icon unlock (+ optional render greet clr enter) */
+const standIdx = id => STANDS.findIndex(s => s.id === id);
+const standState = i => S.level < STANDS[i].from ? 'locked' : !STANDS[i].built ? 'soon' : i === S.stand ? 'here' : 'open';
 
 /* one stall, centered at 0,0 on the ground line. Also used as the chapter popup icon. */
 function stallSvg(i) {
@@ -37,7 +38,7 @@ function drawMap() {
     const lock = st === 'locked' ? `<g transform="translate(60 -92)"><circle r="12" fill="#4a2515"/><rect x="-6" y="-2" width="12" height="9" rx="2" fill="#f4d35e"/><path d="M-4 -2V-5Q-4 -10 0 -10Q4 -10 4 -5V-2" stroke="#f4d35e" stroke-width="2.4" fill="none"/></g>` : '';
     return `<g class="stall ${st}" data-i="${i}" transform="translate(${x} ${y})">${stallSvg(i)}${lock}</g>`;
   }).join('');
-  const [px, py] = SPOTS[curStand];
+  const [px, py] = SPOTS[S.stand];
   const pin = `<g transform="translate(${px} ${py - 118})"><g class="pin"><path d="M0 24L-9 10H9Z" fill="#e76f51"/><circle cx="0" cy="-8" r="22" fill="#fff" stroke="#e76f51" stroke-width="4"/><g clip-path="url(#pinclip)">${mini(crOpts()).replace('class="ch"', '').replace('<svg ', '<svg x="-18" y="-24" width="36" height="28" ')}</g></g></g>`;
   $('#mapsvg').innerHTML = `<svg viewBox="0 0 800 340"><defs><clipPath id="pinclip"><circle cx="0" cy="-8" r="19"/></clipPath></defs><rect width="800" height="340" fill="#9bd06b"/><circle cx="160" cy="330" r="120" fill="#8ec36a"/><circle cx="640" cy="40" r="110" fill="#8ec36a"/>${trees}<path d="${ROAD}" fill="none" stroke="#b7a583" stroke-width="54" stroke-linecap="round"/><path d="${ROAD}" fill="none" stroke="#d8c8a8" stroke-width="46" stroke-linecap="round"/><path d="${ROAD}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3" stroke-dasharray="12 12"/>${jeep}${stalls}${pin}</svg>`;
   const c = standOf(S.level), s = STANDS[c], nextTH = TH[Math.min(MAXLV, s.to + 1)];
@@ -53,8 +54,23 @@ function pickStand(i) {
   const st = standState(i), s = STANDS[i];
   if (st === 'locked') return toast(`Reach Level ${s.from} to unlock the ${s.name}.`, 1);
   if (st === 'soon') return toast(`The ${s.name} opens in the next update. Keep leveling up!`);
-  curStand = i; closeMap();
+  if (i !== S.stand) switchStand(i);
+  closeMap();
 }
 function openMap() { if (!S.on) return; hold(); drawMap(); ov('mapm', true); }
 function closeMap() { if (!isOn('mapm')) return; ov('mapm', false); release(); }
 $('#mapm').addEventListener('click', e => { const g = e.target.closest('[data-i]'); if (g) pickStand(+g.dataset.i); });
+
+/* stands: the counter, customers, cash drawer and map are shared. Only the front table changes. */
+function applyStand() {
+  $('#scene').dataset.stand = STANDS[S.stand].id;
+  $('#clr').textContent = (STAND_FN[S.stand] && STAND_FN[S.stand].clr) || 'Empty bag';
+  S.sel = null; bagKey = ''; draw();
+}
+function switchStand(i) {
+  S.custs.forEach(c => c.el.remove()); S.custs = []; S.slots.fill(null); S.give = [];
+  Object.values(STAND_FN).forEach(f => f.reset && f.reset());
+  S.stand = i; S.nextSpawn = Date.now() + 900;
+  applyStand(); paintSlots(); saveGame(); toast(`Welcome to the ${STANDS[i].name}!`);
+  if (STAND_FN[i] && STAND_FN[i].enter) STAND_FN[i].enter();
+}

@@ -34,11 +34,11 @@ const DEF = { sfx: .7, amb: .35, diff: 'normal', easy: false, mute: false, unloc
 function loadBest() { try { return +localStorage.getItem('tusok-best') || 1; } catch (e) { return 1; } }
 function saveBest() { try { localStorage.setItem('tusok-best', S.best); } catch (e) { /* storage blocked */ } }
 /* progress is saved after every customer, so a 40 level game can be played over many sessions */
-function saveGame() { try { localStorage.setItem('tusok-save', JSON.stringify({ earned: S.earned, served: S.served, mastered: S.mastered })); } catch (e) { /* storage blocked */ } }
+function saveGame() { try { localStorage.setItem('tusok-save', JSON.stringify({ earned: S.earned, served: S.served, mastered: S.mastered, stand: S.stand })); } catch (e) { /* storage blocked */ } }
 function loadGame() {
   try {
     const d = JSON.parse(localStorage.getItem('tusok-save') || 'null');
-    if (d) { S.earned = d.earned || 0; S.served = d.served || 0; S.mastered = !!d.mastered; S.level = levelFor(S.earned); S.best = Math.max(S.best, S.level); }
+    if (d) { S.earned = d.earned || 0; S.served = d.served || 0; S.mastered = !!d.mastered; S.level = levelFor(S.earned); const st = STANDS[d.stand || 0]; S.stand = st && st.built && S.level >= st.from ? (d.stand || 0) : 0; S.best = Math.max(S.best, S.level); }
   } catch (e) { /* ignore bad data */ }
 }
 function loadSet() { try { return { ...DEF, ...JSON.parse(localStorage.getItem('tusok-set') || '{}') }; } catch (e) { return { ...DEF }; } }
@@ -70,6 +70,7 @@ const TYPES = [
 /* ---------- SVG FOOD + MONEY ---------- */
 function food(k) {
   if (k === 'palamig') return cup();
+  if (FD[k] && FD[k].stand) return STAND_FN[standIdx(FD[k].stand)].icon(k);
   const c = FD[k].c; let s = '';
   if (k === 'fishball' || k === 'squid') s = [14, 30, 46].map(y => `<circle cx="30" cy="${y}" r="9.5" fill="${c}" stroke="#0003"/><circle cx="26.5" cy="${y - 3}" r="2.6" fill="#fff9"/>${k === 'squid' ? `<circle cx="34" cy="${y + 3}" r="1.4" fill="#8a2f1a"/>` : ''}`).join('');
   if (k === 'kikiam') s = [8, 25, 42].map(y => `<rect x="19" y="${y}" width="22" height="15" rx="6" fill="${c}" stroke="#0004"/><path d="M24 ${y + 5}h12M24 ${y + 10}h12" stroke="#d9904a" stroke-width="1.6"/>`).join('');
@@ -88,10 +89,11 @@ const coin = d => `<svg viewBox="0 0 40 40" class="mn"><circle cx="20" cy="20" r
 const money = d => BILL[d] ? bill(d) : coin(d);
 
 /* ---------- STATE ---------- */
-const S = { name: '', title: 'Ate', earned: 0, level: 1, served: 0, slots: Array(N).fill(null), custs: [], sel: null, give: [], uid: 0, on: false, paused: false, pauseAt: 0, nextSpawn: 0, queue: [], holds: 0, mastered: false, set: loadSet(), best: loadBest() };
+const S = { name: '', title: 'Ate', earned: 0, level: 1, served: 0, slots: Array(N).fill(null), custs: [], sel: null, give: [], uid: 0, on: false, paused: false, pauseAt: 0, nextSpawn: 0, queue: [], holds: 0, mastered: false, set: loadSet(), best: loadBest(), stand: 0, mc2: null };
 let slotEls = [], bagKey = '';
 const tgt = () => S.custs.find(c => c.id === S.sel);
-const state = s => { const a = Date.now() - s.t; return a < RAW ? 'raw' : a < BURN ? 'ready' : 'burnt'; };
+const cookOf = k => (FD[k] && FD[k].cook) || [RAW, BURN];   /* [ready after, burnt after] in ms */
+const state = s => { const a = Date.now() - s.t, [r, b] = cookOf(s.k); return a < r ? 'raw' : a < b ? 'ready' : 'burnt'; };
 const act = () => $$('.arm').forEach(a => { a.classList.remove('act'); void a.offsetWidth; a.classList.add('act'); });
 const sum = a => a.reduce((x, y) => x + y, 0);
 function toast(m, bad) { if (bad) SND.err(); const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.x); toast.x = setTimeout(() => t.classList.remove('on'), 2400); }
@@ -100,7 +102,7 @@ function hold() { if (S.holds++ === 0) { S.pauseAt = Date.now(); S.paused = true
 function release() {
   if (--S.holds > 0) return; S.holds = 0;
   const dt = Date.now() - S.pauseAt;
-  S.slots.forEach(s => { if (s) s.t += dt; }); S.nextSpawn += dt; S.paused = false;
+  S.slots.forEach(s => { if (s) s.t += dt; }); (S.grill || []).forEach(s => { if (s) s.t += dt; }); S.nextSpawn += dt; S.paused = false;
 }
 function show(id) { $$('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
 
@@ -132,7 +134,7 @@ function build() {
 }
 function start() {
   S.name = $('#nm').value.trim() || 'Juan';
-  loadGame(); applyLook();
+  loadGame(); applyLook(); applyStand();
   show(''); $('#game').classList.add('on');
   document.body.classList.add('ingame'); S.on = true; S.nextSpawn = Date.now() + 700; SND.init(); SND.loop(); syncSet();
   draw(); setInterval(tick, 200); setInterval(bubbles, 260);
@@ -168,11 +170,11 @@ function paintSlots() {
     const d = slotEls[i];
     if (!s) { d.className = 'slot'; d.innerHTML = ''; d.dataset.k = ''; return; }
     const st = state(s);
-    if (st === 'ready' && !s.dn) { s.dn = 1; SND.ding(); }
-    if (st === 'burnt' && !s.bn) { s.bn = 1; SND.burnt(); }
+    if (st === 'ready' && !s.dn) { s.dn = 1; SND.ding(); setTimeout(draw, 0); }
+    if (st === 'burnt' && !s.bn) { s.bn = 1; SND.burnt(); setTimeout(draw, 0); }
     d.className = 'slot ' + st;
     if (d.dataset.k !== s.k) { d.innerHTML = food(s.k); d.dataset.k = s.k; }
-    d.style.setProperty('--p', st === 'raw' ? Math.min(100, (Date.now() - s.t) / RAW * 100) + '%' : '100%');
+    d.style.setProperty('--p', st === 'raw' ? Math.min(100, (Date.now() - s.t) / cookOf(s.k)[0] * 100) + '%' : '100%');
   });
 }
 function bubbles() {
@@ -185,8 +187,10 @@ function bubbles() {
 /* ---------- CUSTOMERS ---------- */
 const lineText = c => c.order.map(l => `${l.qty} ${FD[l.k].n}`).join(', ');
 const orderTl = c => { const p = c.order.map(l => `${l.qty} ${FD[l.k].tl}`); return p.length > 1 ? p.slice(0, -1).join(', ') + ' at ' + p[p.length - 1] : p[0]; };
+const orderText = c => c.kind ? STAND_FN[S.stand].tl(c) : orderTl(c);
+const ticketText = c => c.kind ? STAND_FN[S.stand].ticket(c) : lineText(c);
 function makeOrder() {
-  const pool = Object.keys(FD).filter(k => FD[k].lv <= S.level);
+  const pool = Object.keys(FD).filter(k => FD[k].lv <= S.level && (FD[k].stand || 'cart') === 'cart');
   const nl = S.level < 2 ? 1 : S.level < 4 ? (Math.random() < .55 ? 2 : 1) : pick([1, 2, 2, 3]);
   return [...pool].sort(() => Math.random() - .5).slice(0, Math.min(nl, pool.length))
     .map(k => ({ k, qty: (k === 'fishball' || k === 'kikiam') ? rnd(2, 5) : rnd(1, 3) }));
@@ -201,7 +205,7 @@ function render(c) {
   const w = c.el, o = c.phase === 'order';
   w.querySelector('small').textContent = c.ty.n + (c.rushed ? ' (in a hurry)' : '');
   w.querySelector('.say').textContent = o ? c.line : c.payLine;
-  w.querySelector('.ticket').textContent = o ? `Order: ${lineText(c)}${c.sauce ? ' + ' + SA[c.sauce].n : ''}` : `Paid ₱${c.paid}`;
+  w.querySelector('.ticket').textContent = o ? `Order: ${ticketText(c)}${c.sauce ? ' + ' + SA[c.sauce].n : ''}` : `Paid ₱${c.paid}`;
   w.querySelector('.pay').innerHTML = o ? '' : money(c.paid);
   faceOf(c);
 }
@@ -211,11 +215,11 @@ function spawn() {
   look.eyes = pick(['round', 'round', 'dots', 'sparkle', 'lashes']); look.eyeColor = pick(['#3b2314', '#3b2314', '#6b3e1f', '#4a8fd6']);
   look.ac = pick(['#e63946', '#5aa9e6', '#f4d35e', '#8a63d2']); if (Math.random() < .3) look.face = ['freckles']; if (Math.random() < .2) look.ears = 'studs';
   const cp = CAP(S.level), seat = [0, 1, 2].slice(0, cp).find(s => !S.custs.some(c => c.seat === s));
-  const order = makeOrder(), rushed = Math.random() < .25;
+  const ho = S.stand ? STAND_FN[S.stand].order() : null, order = ho ? ho.order : makeOrder(), kind = ho ? ho.kind : null, rushed = Math.random() < .25;
   const total = sum(order.map(l => FD[l.k].p * l.qty));
-  const sauce = order.some(l => l.k !== 'palamig') && Math.random() < .7 ? pick(Object.keys(SA)) : null;
-  const c = { id: ++S.uid, ty, look, order, total, sauce, got: null, bag: {}, seat, rushed, phase: 'order', pat: 100, mood: 'neutral', tip: 0 };
-  let line = (rushed ? 'Nagmamadali po ako! ' : '') + ty.say(S.title, S.name, orderTl(c));
+  const sauce = !kind && order.some(l => l.k !== 'palamig') && Math.random() < .7 ? pick(Object.keys(SA)) : null;
+  const c = { id: ++S.uid, ty, look, order, kind, total, sauce, got: null, bag: {}, seat, rushed, phase: 'order', pat: 100, mood: 'neutral', tip: 0 };
+  let line = (S.stand && STAND_FN[S.stand].greet ? STAND_FN[S.stand].greet() : '') + (rushed ? 'Nagmamadali po ako! ' : '') + ty.say(S.title, S.name, orderText(c));
   if (sauce) line += pick([` Lagyan po ng ${SA[sauce].tl}.`, ` Dagdagan mo po ng maraming ${SA[sauce].tl}!`]);
   c.line = line;
   c.el = el('div', 'cw enter', '<div class="bubble"><small></small><p class="say"></p><div class="ticket"></div><div class="pat"><i></i></div></div><div class="face"></div><div class="pay"></div>');
@@ -233,7 +237,7 @@ function removeCust(c, mood) {
 function handOver() {
   const c = tgt(); if (!c || c.phase !== 'order') return;
   const ks = Object.keys(c.bag).filter(k => c.bag[k] > 0);
-  if (ks.length !== c.order.length || !c.order.every(l => c.bag[l.k] === l.qty)) return toast(`That bag is not right. They want ${lineText(c)}.`, 1);
+  if (ks.length !== c.order.length || !c.order.every(l => c.bag[l.k] === l.qty)) return toast(`That bag is not right. They want ${ticketText(c)}.`, 1);
   if (c.sauce && c.got !== c.sauce) return toast(`Wrong sauce. They want ${SA[c.sauce].n}.`, 1);
   c.phase = 'pay'; c.paid = payFor(c.total); c.change = c.paid - c.total;
   c.tip = (c.pat > 50 ? Math.ceil(c.total * .15) : 0) + (c.rushed && c.pat > 40 ? 5 : 0);
@@ -273,27 +277,30 @@ function nextPopup() {
     release(); seatUp(); draw(); return;
   }
   let h, ic, d;
-  $('#mc2').style.display = q.t === 'win' ? 'inline-block' : 'none';
+  const toMap = q.t === 'chap' && STANDS[STARTS[q.l]].built;
+  $('#mc2').style.display = q.t === 'win' || toMap ? 'inline-block' : 'none';
+  $('#mc2').textContent = toMap ? 'Open map' : 'Main menu';
+  S.mc2 = toMap ? () => { S.queue.length = 0; $('#modal').classList.remove('on'); release(); openMap(); } : null;
   ({ lv: () => SND.fanfare(), un: () => SND.unlock(), acc: () => SND.unlock(), chap: () => SND.fanfare(), win: () => SND.win() })[q.t]();
   if (q.t === 'win') {
     h = 'You mastered the market!';
     ic = '<svg viewBox="0 0 80 80"><path d="M22 10h36v18a18 18 0 0 1-36 0z" fill="#f4c430" stroke="#a8661a" stroke-width="3"/><path d="M22 14H10q0 18 14 20M58 14h12q0 18-14 20" fill="none" stroke="#a8661a" stroke-width="4"/><rect x="34" y="44" width="12" height="14" fill="#e0a82e"/><rect x="24" y="58" width="32" height="10" rx="3" fill="#a8661a"/></svg>';
-    d = `Level ${MAXLV}! You earned ₱${S.earned} and served ${S.served} customers. Aling Nena says: "Ikaw na ang pinakamagaling kong katulong, ${S.name}!" Keep playing with faster customers, or head back to the menu.`;
+    d = `Level ${MAXLV}! You earned ₱${S.earned} and served ${S.served} customers. Aling Linda says: "Ikaw na ang pinakamagaling kong katulong, ${S.name}!" Keep playing with faster customers, or head back to the menu.`;
   } else if (q.t === 'chap') {
     const i = STARTS[q.l], st = STANDS[i]; h = `Chapter ${i} complete!`; ic = standIcon(i);
-    d = st.built ? `The ${st.name} is open! Open the Market Map from the Pause menu to visit it.` : `Aling Nena is building the ${st.name}. It opens in the next update. Keep leveling up and it will be ready.`;
+    d = st.built ? `The ${st.name} is open! Open the map to visit it, or find it later in the Pause menu.` : `Aling Linda is building the ${st.name}. It opens in the next update. Keep leveling up and it will be ready.`;
   } else if (q.t === 'acc') {
     const n = accNew(q.l); h = 'New styles unlocked!'; ic = previewWith(n[0].key, n[0].val);
     d = `You can now wear: ${n.map(i => i.label).join(', ')}. Open Customize in the Pause menu to try ${n.length > 1 ? 'them' : 'it'} on.`;
   } else if (q.t === 'lv') {
     h = `Level ${q.l - 1} complete!`; ic = `<div class="badge">${q.l}</div>`;
-    d = `You are now Level ${q.l}, ${S.title} ${S.name}. Ang galing mo! Aling Nena is proud of you.`;
+    d = `You are now Level ${q.l}, ${S.title} ${S.name}. Ang galing mo! Aling Linda is proud of you.`;
   } else if (q.u.cap) {
     h = 'More customers!'; ic = ch({ style: 'long', top: '#7b6cf6', extra: ['headband'], skin: '#e0a97c' });
     d = `The counter now has ${q.u.cap} spots. Tap a customer to switch between their orders.`;
   } else {
     const k = q.u.k; h = 'You unlocked ' + FD[k].n + '!'; ic = food(k);
-    d = k === 'palamig' ? `Tap the palamig jug on the counter to fill a cup. ₱${FD[k].p} each.` : `${FD[k].n} is now in the food bins, ₱${FD[k].p} each. Customers will start ordering it.`;
+    d = k === 'palamig' ? `Tap the palamig jug on the counter to fill a cup. ₱${FD[k].p} each.` : FD[k].stand ? STAND_FN[standIdx(FD[k].stand)].unlock(k) : `${FD[k].n} is now in the food bins, ₱${FD[k].p} each. Customers will start ordering it.`;
   }
   $('#mt').textContent = h; $('#mi').innerHTML = ic; $('#mi').classList.toggle('tall', q.t === 'acc'); $('#md').textContent = d;
   $('#mc').textContent = q.t === 'win' ? 'Keep playing' : S.queue.length ? 'Next' : 'Continue';
@@ -313,7 +320,7 @@ function tick() {
     if (c.pat <= 0) { toast(`${c.ty.n} got tired of waiting and left.`); removeCust(c, 'angry'); }
   });
   if (S.custs.length < CAP(S.level) && Date.now() >= S.nextSpawn) spawn();
-  paintSlots();
+  paintSlots(); if (S.stand) STAND_FN[S.stand].tick();
 }
 function drawCash() {
   const c = payer();
@@ -336,19 +343,21 @@ function draw() {
   const c = tgt(), bg = c && c.phase === 'order' ? c.bag : {}, ks = Object.keys(bg).filter(k => bg[k] > 0), got = c && c.phase === 'order' ? c.got : null;
   for (const k in SA) $('#j_' + k).classList.toggle('sel', got === k);
   const key = JSON.stringify([bg, got, c && c.id]);
-  if (key !== bagKey) {
+  if (S.stand && STAND_FN[S.stand].render) STAND_FN[S.stand].render(c);
+  else if (key !== bagKey) {
     bagKey = key;
     const inner = ks.map(k => food(k).repeat(Math.min(bg[k], 4)) + `<b>×${bg[k]}</b>`).join('');
     $('#bag').innerHTML = `<div class="bagb ${ks.length ? '' : 'empty'}"><div class="inner">${inner}</div><div class="front"></div>${got ? `<span class="sau" style="--c:${SA[got].c}">${SA[got].n}</span>` : ''}</div>`;
   }
   $('#srv').disabled = !(c && c.phase === 'order');
-  $('#tip').textContent = !S.custs.length ? 'Waiting for the next customer...'
+  $('#tip').textContent = S.stand && c && c.phase === 'order' ? STAND_FN[S.stand].tip(c) : !S.custs.length ? 'Waiting for the next customer...'
     : !c ? 'Tap a customer to work on their order.'
     : c.phase === 'pay' ? 'Give the exact change from the cash drawer on the right.'
     : !ks.length && !S.slots.some(Boolean) ? 'Tap a food bin on the left to start frying.'
     : !ks.length ? 'Tap food that glows golden to put it in the selected customer\'s bag.'
     : c.sauce && !c.got ? 'Tap the sauce jar the customer asked for.'
     : 'Check the order note, then press Hand over order.';
+  if (S.stand) STAND_FN[S.stand].update();
   drawCash();
 }
 build();

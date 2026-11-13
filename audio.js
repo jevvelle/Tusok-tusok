@@ -45,6 +45,8 @@ const SND = {
   pop() { this.noise(.04, .1, 4200); },
   ding() { this.tone(1320, .3, 'sine', .12); },
   burnt() { this.noise(.4, .22, 700, 'lowpass'); this.tone(180, .35, 'sawtooth', .07, 0, 80); },
+  shave() { for (let i = 0; i < 7; i++) this.noise(.1, .13, 3600, 'highpass', i * .2); this.tone(110, 1.4, 'sawtooth', .04, 0, 90); },
+  sleigh() { for (let i = 0; i < 9; i++) { this.tone(2800 + (i % 3) * 320, .16, 'sine', .06, i * .06); this.tone(5400, .08, 'triangle', .025, i * .06 + .02); } },
   glug() { this.tone(520, .12, 'sine', .2, 0, 260); this.tone(480, .12, 'sine', .2, .14, 240); },
 
   /* ---- ui + money ---- */

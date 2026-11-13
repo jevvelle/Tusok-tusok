@@ -62,7 +62,7 @@ function menuArt() {
   $('#pbtn').onclick = openPause;
   $('#resume').onclick = closePause;
   $('#quit').onclick = () => { if (confirm('Quit to the main menu? Your progress will be lost.')) location.reload(); };
-  $('#mc2').onclick = () => location.reload();
+  $('#mc2').onclick = () => (S.mc2 ? S.mc2() : location.reload());
   const mute = () => { S.set.mute = !S.set.mute; saveSet(); syncSet(); };
   $('#sbtn').onclick = mute; $('#msound').onclick = mute;
   ['mfull', 'fsbtn', 'sfull'].forEach(id => { $('#' + id).onclick = toggleFS; if (!FS) $('#' + id).style.display = 'none'; });
